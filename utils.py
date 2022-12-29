@@ -1,5 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import torch
+
+
+def get_train_images(num):
+    return torch.stack([train_dataset[i][0] for i in range(num)], dim=0)
 
 def load_data():
     X = np.load("data/X_part1.npy")

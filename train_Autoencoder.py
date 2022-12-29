@@ -28,5 +28,5 @@ def train_Anamoly(latent_dim,CHECKPOINT_PATH):
     return model, result
 
 if __name__=="__main__":
-    CHECKPOINT_PATH=".Image_Anomoly_CKPTS"
+    CHECKPOINT_PATH="anamoly_checkpoints"
     train_Anamoly(latent_dim=512,CHECKPOINT_PATH=CHECKPOINT_PATH)
