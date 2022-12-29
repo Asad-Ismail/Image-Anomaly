@@ -1,7 +1,7 @@
 from models.autoencoder_vgg import *
 
 
-def train_Anamoly(latent_dim,CHECKPOINT_PATH):
+def train_Anamoly(latent_dim,CHECKPOINT_PATH,train_loader,val_loader):
     # Create a PyTorch Lightning trainer with the generation callback
     trainer = pl.Trainer(default_root_dir=os.path.join(CHECKPOINT_PATH, f"anamoly_road_{latent_dim}"),
                          accelerator="cuda" if str(device).startswith("cuda") else "cpu",
@@ -29,4 +29,5 @@ def train_Anamoly(latent_dim,CHECKPOINT_PATH):
 
 if __name__=="__main__":
     CHECKPOINT_PATH="anamoly_checkpoints"
-    train_Anamoly(latent_dim=512,CHECKPOINT_PATH=CHECKPOINT_PATH)
+    train_loader,val_loader=get_data()
+    train_Anamoly(512,CHECKPOINT_PATH,train_loader,val_loader)
