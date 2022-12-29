@@ -1,4 +1,5 @@
-from models.autoencoder_vgg import Autoencoder
+from models.autoencoder_vgg import *
+
 
 def train_Anamoly(latent_dim,CHECKPOINT_PATH):
     # Create a PyTorch Lightning trainer with the generation callback
