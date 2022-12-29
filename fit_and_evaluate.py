@@ -22,6 +22,7 @@ def estimate_gaussian(X):
 def get_features(dloader):
     ## Train features for checking 
     train_features=[]
+    ys=[]
     for i,item in enumerate(tqdm(dloader)):
         x,y=item[0],item[1]
         model.cuda()
@@ -30,7 +31,8 @@ def get_features(dloader):
         #x=x.unsqueeze(0)
         y=model.encoder(x).detach().cpu()
         train_features.append(y.flatten(start_dim=1))
-    return train_features
+        ys.append(y)
+    return train_features,ys
     
 
 if __name__=="__main__":
@@ -41,5 +43,11 @@ if __name__=="__main__":
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=18, shuffle=True,drop_last=True) 
     val_dataset = datasets.ImageFolder(val_dir, transform=transform)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=18, shuffle=True,drop_last=True)
-    train_features=get_features(train_loader)
+    train_features,_=get_features(train_loader)
     mu, var = estimate_gaussian(train_features)  
+    p_train = multivariate_gaussian(train_features, mu, var)
+    val_features,y_val=get_features(val_loader)
+    p_val = multivariate_gaussian(val_features, mu, var)
+    epsilon, F1 = select_threshold(y_val, p_val)
+    print('Best epsilon found using cross-validation: %e' % epsilon)
+    print('Best F1 on Cross Validation Set: %f' % F1)
