@@ -36,7 +36,7 @@ def get_features(dloader):
     
 
 if __name__=="__main__":
-    train_dir = '../AnamolyData/train/images' # load from Kaggle
+    train_dir = '../AnamolyData/train/images' 
     val_dir= '../AnamolyData/val/images'
     transform = transforms.Compose([transforms.Resize((512,512)),transforms.ToTensor(),transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
     train_dataset = datasets.ImageFolder(train_dir, transform=transform)

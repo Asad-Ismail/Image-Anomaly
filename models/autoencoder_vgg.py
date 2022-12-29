@@ -162,3 +162,8 @@ class Autoencoder(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         loss = self._get_reconstruction_loss(batch)
         self.log('test_loss', loss)
+
+if __name__=="__main__":
+    model=Autoencoder(latent_dim=512)
+    x=torch.rand(1,3,512,512)
+    y=model(x)
