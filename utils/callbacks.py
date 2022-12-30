@@ -1,3 +1,5 @@
+import pytorch_lightning as pl
+
 class GenerateCallback(pl.Callback):
 
     def __init__(self, input_imgs, every_n_epochs=1):

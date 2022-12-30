@@ -1,5 +1,6 @@
-from utils import *
+from utils.utils import *
 import numpy as np
+from tqdm import tqdm
 
 def estimate_gaussian(X): 
     """
@@ -23,7 +24,7 @@ def get_features(dloader):
     ## Train features for checking 
     features=[]
     ys=[]
-    for i,item in enumerate(tqdm(dloader)):
+    for i,item in tqdm(enumerate(tqdm(dloader))):
         x,y=item[0],item[1]
         model.cuda()
         model.eval()
@@ -32,23 +33,24 @@ def get_features(dloader):
         y=model.encoder(x).detach().cpu()
         features.append(y.flatten(start_dim=1).numpy())
         ys.append(y)
-    features=np.concatenate(train_features)
-    ys=np.concatenate(ys)
+    features=np.concatenate(train_features,axis=0)
+    ys=np.concatenate(ys,axis=0)
     return features,ys
     
 
 if __name__=="__main__":
     train_dir = '../AnamolyData/train/images' 
     val_dir= '../AnamolyData/val/images'
-    transform = transforms.Compose([transforms.Resize((512,512)),transforms.ToTensor(),transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
-    train_dataset = datasets.ImageFolder(train_dir, transform=transform)
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=18, shuffle=True,drop_last=True) 
-    val_dataset = datasets.ImageFolder(val_dir, transform=transform)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=18, shuffle=True,drop_last=True)
+    train_loader,val_loader,_=get_data(32)
+    print(f"Getting Train features!!")
     train_features,_=get_features(train_loader)
+    print(f"Train features sizes are {train_features.shape}")
     mu, var = estimate_gaussian(train_features)  
     p_train = multivariate_gaussian(train_features, mu, var)
+    print(f"Getting Val features!!")
     val_features,y_val=get_features(val_loader)
+    print(f"Val features sizes are {train_features.shape}")
+    print(f"Val Labels sizes are {y_val.shape}")
     p_val = multivariate_gaussian(val_features, mu, var)
     epsilon, F1 = select_threshold(y_val, p_val)
     print('Best epsilon found using cross-validation: %e' % epsilon)

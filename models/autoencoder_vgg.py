@@ -9,6 +9,7 @@ from torchvision import transforms
 # PyTorch Lightning
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+import timm
 
 
 
@@ -108,8 +109,8 @@ class Autoencoder(pl.LightningModule):
                  encoder_class : object = Encoder,
                  decoder_class : object = Decoder,
                  num_input_channels: int = 3,
-                 width:int= 512,
-                 height:int= 512):
+                 width:int= 128,
+                 height:int= 128):
         super().__init__()
         # Saving hyperparameters of autoencoder
         self.save_hyperparameters()

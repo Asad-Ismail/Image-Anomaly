@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import torch
 
 
-def get_train_images(num):
-    return torch.stack([train_dataset[i][0] for i in range(num)], dim=0)
+def get_train_images(dataset,num):
+    return torch.stack([dataset[i][0] for i in range(num)], dim=0)
 
 
 def multivariate_gaussian(X, mu, var):
