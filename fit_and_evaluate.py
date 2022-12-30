@@ -14,7 +14,6 @@ def estimate_gaussian(X):
         mu (ndarray): (n,) Mean of all features
         var (ndarray): (n,) Variance of all features
     """
-
     m, n = X.shape
     mu= np.mean(X,axis=0)
     var= np.var(X,axis=0) 
