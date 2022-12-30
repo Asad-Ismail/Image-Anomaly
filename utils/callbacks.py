@@ -1,4 +1,6 @@
 import pytorch_lightning as pl
+import torch
+import torchvision
 
 class GenerateCallback(pl.Callback):
 
