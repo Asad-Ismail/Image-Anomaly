@@ -21,7 +21,7 @@ def estimate_gaussian(X):
 
 def get_features(dloader):
     ## Train features for checking 
-    train_features=[]
+    features=[]
     ys=[]
     for i,item in enumerate(tqdm(dloader)):
         x,y=item[0],item[1]
@@ -30,9 +30,11 @@ def get_features(dloader):
         x=x.cuda()
         #x=x.unsqueeze(0)
         y=model.encoder(x).detach().cpu()
-        train_features.append(y.flatten(start_dim=1))
+        features.append(y.flatten(start_dim=1).numpy())
         ys.append(y)
-    return train_features,ys
+    features=np.concatenate(train_features)
+    ys=np.concatenate(ys)
+    return features,ys
     
 
 if __name__=="__main__":

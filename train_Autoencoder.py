@@ -30,4 +30,4 @@ def train_Anamoly(latent_dim,CHECKPOINT_PATH,train_loader,val_loader):
 if __name__=="__main__":
     CHECKPOINT_PATH="anamoly_checkpoints"
     train_loader,val_loader=get_data()
-    train_Anamoly(512,CHECKPOINT_PATH,train_loader,val_loader)
+    model,result=train_Anamoly(512,CHECKPOINT_PATH,train_loader,val_loader)
