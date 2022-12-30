@@ -22,9 +22,9 @@ modelarch=args.model_arch
 batch_sz=args.batch_sz
 
 
-def train_Anamoly(latent_dim,CHECKPOINT_PATH,train_loader,val_loader):
+def train_Anamoly(latent_dim,train_loader,val_loader):
     # Create a PyTorch Lightning trainer with the generation callback
-    trainer = pl.Trainer(default_root_dir=os.path.join(CHECKPOINT_PATH, f"anamoly_road_{latent_dim}"),
+    trainer = pl.Trainer(default_root_dir=os.path.join(ckpt_path, f"anamoly_road_{latent_dim}"),
                          accelerator="cuda" if str(device).startswith("cuda") else "cpu",
                          devices=1,
                          max_epochs=epochs,
