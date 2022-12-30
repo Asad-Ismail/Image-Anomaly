@@ -1,4 +1,25 @@
 from models.autoencoder_vgg import *
+from utils.callbacks import *
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--dataset",default="hub://aismail2/cucumber_OD",help="Activeloop data path")
+parser.add_argument("--size",default=512,type=int,help="Image size used for training model")
+parser.add_argument("--epochs",default=1000,type=int,help="Image size used for training model")
+parser.add_argument("--device", default="cuda",help="Device to Train Model")
+parser.add_argument("--batch_sz", default=24,type=int,help="Device to Train Model")
+parser.add_argument("--model_arch",default="repvggplus", choices=['resnet', 'repvgg','repvggplus'],type=str,help="Model Architecture")
+parser.add_argument("--ckpt_path",default="./ckpts",type=str,help="Output of weights")
+
+args = parser.parse_args()
+data_path = args.dataset
+img_sz = args.size
+dname = args.device
+ckpt_path=args.ckpt_path
+epochs=args.epochs
+modelarch=args.model_arch
+batch_sz=args.batch_sz
 
 
 def train_Anamoly(latent_dim,CHECKPOINT_PATH,train_loader,val_loader):
@@ -6,7 +27,7 @@ def train_Anamoly(latent_dim,CHECKPOINT_PATH,train_loader,val_loader):
     trainer = pl.Trainer(default_root_dir=os.path.join(CHECKPOINT_PATH, f"anamoly_road_{latent_dim}"),
                          accelerator="cuda" if str(device).startswith("cuda") else "cpu",
                          devices=1,
-                         max_epochs=1000,
+                         max_epochs=epochs,
                          callbacks=[ModelCheckpoint(save_weights_only=True),
                                     GenerateCallback(get_train_images(8), every_n_epochs=10),
                                     LearningRateMonitor("epoch")])

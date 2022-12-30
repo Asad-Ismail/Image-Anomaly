@@ -6,18 +6,6 @@ import torch
 def get_train_images(num):
     return torch.stack([train_dataset[i][0] for i in range(num)], dim=0)
 
-def load_data():
-    X = np.load("data/X_part1.npy")
-    X_val = np.load("data/X_val_part1.npy")
-    y_val = np.load("data/y_val_part1.npy")
-    return X, X_val, y_val
-
-def load_data_multi():
-    X = np.load("data/X_part2.npy")
-    X_val = np.load("data/X_val_part2.npy")
-    y_val = np.load("data/y_val_part2.npy")
-    return X, X_val, y_val
-
 
 def multivariate_gaussian(X, mu, var):
     """
