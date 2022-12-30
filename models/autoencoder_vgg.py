@@ -179,6 +179,12 @@ class Autoencoder(pl.LightningModule):
         self.log('test_loss', loss)
 
 if __name__=="__main__":
-    model=Autoencoder(latent_dim=512)
-    x=torch.rand(1,3,512,512)
-    y=model(x)
+    #model=Autoencoder(latent_dim=512)
+    #x=torch.rand(1,3,512,512)
+    #y=model(x)
+    model_names = timm.list_models('*vgg*')
+    print(model_names)
+    encoder = timm.create_model('vgg19_bn',features_only=True, pretrained=True)
+    o = encoder(torch.randn(2, 3, 128, 128))
+    for x in o:
+        print(x.shape)
