@@ -1,4 +1,6 @@
 from utils.utils import *
+from data.dataloader import *
+from models.autoencoder_vgg import *
 import numpy as np
 from tqdm import tqdm
 
@@ -19,7 +21,7 @@ def estimate_gaussian(X):
     var= np.var(X,axis=0) 
     return mu, var
 
-def get_features(dloader):
+def get_features(model,dloader):
     ## Train features for checking 
     features=[]
     ys=[]
@@ -32,23 +34,27 @@ def get_features(dloader):
         y=model.encoder(x).detach().cpu()
         features.append(y.flatten(start_dim=1).numpy())
         ys.append(y)
-    features=np.concatenate(train_features,axis=0)
+    features=np.concatenate(features,axis=0)
     ys=np.concatenate(ys,axis=0)
     return features,ys
     
 
 if __name__=="__main__":
+    print(f"Getting data!!")
     train_dir = '../AnamolyData/train/images' 
     val_dir= '../AnamolyData/val/images'
     train_loader,val_loader,_=get_data(32)
+    print(f"Getting Model!!")
+    weights="./ckpts/anamoly_road_512/lightning_logs/version_0/checkpoints/epoch=20-step=61572.ckpt"
+    model = Autoencoder.load_from_checkpoint(weights)
     print(f"Getting Train features!!")
-    train_features,_=get_features(train_loader)
-    print(f"Train features sizes are {train_features.shape}")
+    train_features,_=get_features(model,train_loader)
+    print(f"Train features shape is {train_features.shape}")
     mu, var = estimate_gaussian(train_features)  
     p_train = multivariate_gaussian(train_features, mu, var)
     print(f"Getting Val features!!")
-    val_features,y_val=get_features(val_loader)
-    print(f"Val features sizes are {train_features.shape}")
+    val_features,y_val=get_features(model,val_loader)
+    print(f"Val features shape is {val_features.shape}")
     print(f"Val Labels sizes are {y_val.shape}")
     p_val = multivariate_gaussian(val_features, mu, var)
     epsilon, F1 = select_threshold(y_val, p_val)
