@@ -24,18 +24,22 @@ def estimate_gaussian(X):
 def get_features(model,dloader):
     ## Train features for checking 
     features=[]
-    ys=[]
+    labels=[]
     for i,item in tqdm(enumerate(tqdm(dloader))):
-        x,y=item[0],item[1]
+        x,label=item[0],item[1]
+        label=label.unsqueeze(0)
+        if (i>5):
+            break
         model.cuda()
         model.eval()
         x=x.cuda()
         #x=x.unsqueeze(0)
         y=model.encoder(x).detach().cpu()
         features.append(y.flatten(start_dim=1).numpy())
-        ys.append(y)
+        labels.append(y)
     features=np.concatenate(features,axis=0)
-    ys=np.concatenate(ys,axis=0)
+    labels=np.concatenate(labels,axis=0)
+    print(f"ys shape is {labels.shape}")
     return features,ys
     
 
