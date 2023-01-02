@@ -1,4 +1,4 @@
-from models.autoencoder_vgg import *
+from models.autoencoder_vgg_512 import *
 from utils.callbacks import *
 from data.dataloader import *
 from utils.utils import *

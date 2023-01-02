@@ -19,7 +19,9 @@ class Encoder(nn.Module):
         self.encoder = timm.create_model('vgg19_bn',features_only=True, pretrained=False)
 
     def forward(self, x):
-        return self.encoder(x)[-1]
+        x=self.encoder(x)[-1]
+        x=x.mean((2,3),keepdim=True)
+        return x
 
 class Decoder(nn.Module):
     """Decoder"""
@@ -41,6 +43,10 @@ class Decoder(nn.Module):
         inter3=inter2//2
         
         self.net = nn.Sequential(
+            nn.ConvTranspose2d(c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2), # 16x16 => 32x32
+            act_fn(),
+            nn.ConvTranspose2d(c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2), # 16x16 => 32x32
+            act_fn(),
             nn.ConvTranspose2d(c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2), # 16x16 => 32x32
             act_fn(),
             nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
