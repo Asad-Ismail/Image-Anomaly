@@ -97,7 +97,7 @@ def get_recons_loss(model,dloader,save_examples=True,imgs=50):
         model.eval()
         x=x.cuda()
         pred_img=model(x).detach().cpu()
-        dist=F.mse_loss(pred_img.flatten(start_dim=1),x.detach().cpu().flatten(start_dim=1),reduction="none").mean(axis=1)
+        dist=F.l1_loss(pred_img.flatten(start_dim=1),x.detach().cpu().flatten(start_dim=1),reduction="none").mean(axis=1)
         dists.append(dist.detach().cpu().numpy())
         labels.append(label.numpy())
         if save_examples:
@@ -105,7 +105,7 @@ def get_recons_loss(model,dloader,save_examples=True,imgs=50):
     dists=np.concatenate(dists,axis=0)
     labels=np.concatenate(labels,axis=0)
     # Flipping labels as originally 1 is non anamoly
-    #labels = (~labels.astype(bool)).astype(int)
+    labels = (~labels.astype(bool)).astype(int)
     if save_examples:
         vis_results(pred_images,labels,dists,imgs=imgs)
     return dists,labels
@@ -117,7 +117,7 @@ def get_reconstruction_dist(model,save_examples=True):
     train_loader,val_loader,_=get_data(8)
     dists,labels=get_recons_loss(model,val_loader,save_examples=save_examples)
     if not save_examples:
-        epsilon, F1 = select_threshold(labels, dists,reverse=False)
+        epsilon, F1 = select_threshold(labels, dists,reverse=True)
         print('Best epsilon found using cross-validation: %e' % epsilon)
         print('Best F1 on Cross Validation Set: %f' % F1)
     return dists,labels
