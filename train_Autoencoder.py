@@ -41,7 +41,11 @@ def train_Anamoly(latent_dim,train_loader,val_loader,vis_dataset):
     pretrained_filename = os.path.join(ckpt_path, f"anamoly_road_{latent_dim}.ckpt")
     if os.path.isfile(pretrained_filename):
         print("Found pretrained model, loading...")
-        model = Autoencoder.load_from_checkpoint(pretrained_filename)
+        try:
+            model = Autoencoder.load_from_checkpoint(pretrained_filename)
+        except:
+            print(f"Cannot Load pretrained model loading model from scratch")
+            model = Autoencoder(latent_dim=latent_dim)
     else:
         model = Autoencoder(latent_dim=latent_dim)
     trainer.fit(model, train_loader, val_loader)
