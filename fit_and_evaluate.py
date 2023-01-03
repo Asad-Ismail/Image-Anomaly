@@ -1,6 +1,6 @@
 from utils.utils import *
 from data.dataloader import *
-from models.autoencoder_vgg import *
+from models.autoencoder_vgg_512 import *
 import numpy as np
 from tqdm import tqdm
 
@@ -85,7 +85,7 @@ def vis_results(pred_images,labels,dists,imgs):
     plt.savefig("vis_imgs/nonanamolies.png")
     np.savetxt('vis_imgs/Nonanamolies_dist.txt', dists[mask], delimiter='\n')
 
-def get_recons_loss(model,dloader,save_examples=True,imgs=50):
+def get_recons_loss(model,dloader,save_examples=True,imgs=20):
     dists=[]
     labels=[]
     pred_images=[]
@@ -123,11 +123,51 @@ def get_reconstruction_dist(model,save_examples=True):
     return dists,labels
 
 
+def get_kdes(model,dloader,save_examples=True,imgs=20):
+    probs=[]
+    labels=[]
+    pred_images=[]
+    for i,item in tqdm(enumerate(tqdm(dloader))):
+        x,label=item[0],item[1]
+        if (save_examples and i>imgs):
+            break
+        model.cuda()
+        model.eval()
+        x=x.cuda()
+        pred_img=model(x).detach().cpu()
+        probs=F.l1_loss(pred_img.flatten(start_dim=1),x.detach().cpu().flatten(start_dim=1),reduction="none").mean(axis=1)
+        dists.append(dist.detach().cpu().numpy())
+        labels.append(label.numpy())
+        if save_examples:
+            pred_images.append(pred_img)
+    dists=np.concatenate(dists,axis=0)
+    labels=np.concatenate(labels,axis=0)
+    # Flipping labels as originally 1 is non anamoly
+    labels = (~labels.astype(bool)).astype(int)
+    if save_examples:
+        vis_results(pred_images,labels,dists,imgs=imgs)
+    return dists,labels
+
+
+def get_kde_probs(model,save_examples=True):
+    print(f"Getting Data!!")
+    train_loader,val_loader,_=get_data(8)
+    train_features,_=get_features(model,train_loader)
+    print(f"Train features shape is {train_features.shape}")
+    mu, var = estimate_gaussian(train_features)  
+    dists,labels=get_kdes(model,val_loader,save_examples=save_examples)
+    if not save_examples:
+        epsilon, F1 = select_threshold(labels, dists,reverse=True)
+        print('Best epsilon found using cross-validation: %e' % epsilon)
+        print('Best F1 on Cross Validation Set: %f' % F1)
+    return dists,labels
+
+
 
 
 if __name__=="__main__":
     print(f"Getting Model!!")
-    weights="./ckpts/anamoly_road_512/lightning_logs/version_0/checkpoints/epoch=20-step=61572.ckpt"
+    weights="./ckpts/anamoly_road_512/lightning_logs/version_1/checkpoints/epoch=30-step=90892.ckpt"
     model = Autoencoder.load_from_checkpoint(weights)
     dists,labels=get_reconstruction_dist(model,save_examples=False)
     dists,labels=get_reconstruction_dist(model,save_examples=True)
