@@ -14,14 +14,15 @@ import timm
 
 
 class Encoder(nn.Module):
-    def __init__(self):
+    def __init__(self,minvalue=1):
         super().__init__()
         self.encoder = timm.create_model('vgg19_bn',features_only=True, pretrained=False)
-
+        self.minval=minvalue
     def forward(self, x):
         x=self.encoder(x)[-1]
         x=x.mean((2,3),keepdim=True)
-        return x
+        ## Rescale min values so the deterrminant of matrix does not becomes zero
+        return x+self.minval
 
 class Decoder(nn.Module):
     """Decoder"""
@@ -148,6 +149,7 @@ class Autoencoder(pl.LightningModule):
     @torch.no_grad()
     def _get_inception(self,x):
         z=self.inception(x)[-1]
+        z=z.mean((2,3),keepdim=True)+self.encoder.minval
         return z
     
     def _get_inception_loss(self,batch):

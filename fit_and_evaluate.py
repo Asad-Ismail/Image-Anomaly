@@ -3,6 +3,8 @@ from data.dataloader import *
 from models.autoencoder_vgg_512 import *
 import numpy as np
 from tqdm import tqdm
+import scipy
+from scipy import stats
 
 def estimate_gaussian(X): 
     """
@@ -123,7 +125,7 @@ def get_reconstruction_dist(model,save_examples=True):
     return dists,labels
 
 
-def get_kdes(model,dloader,save_examples=True,imgs=20):
+def get_kdes(model,dloader,kernel,save_examples=True,imgs=20):
     probs=[]
     labels=[]
     pred_images=[]
@@ -134,30 +136,46 @@ def get_kdes(model,dloader,save_examples=True,imgs=20):
         model.cuda()
         model.eval()
         x=x.cuda()
-        pred_img=model(x).detach().cpu()
-        probs=F.l1_loss(pred_img.flatten(start_dim=1),x.detach().cpu().flatten(start_dim=1),reduction="none").mean(axis=1)
-        dists.append(dist.detach().cpu().numpy())
+        z=model.encoder(x).detach().cpu().flatten(start_dim=1).numpy()
+        pred_image=model(x).detach().cpu()
+        if isinstance(kernel,tuple):
+            mu,var=kernel
+            prob=multivariate_gaussian(z, mu, var)
+        else:
+            prob=kernel(z)
+        probs.append(prob)
         labels.append(label.numpy())
         if save_examples:
             pred_images.append(pred_img)
-    dists=np.concatenate(dists,axis=0)
+        print(probs)
+    probs=np.concatenate(probs,axis=0)
     labels=np.concatenate(labels,axis=0)
+    print(probs)
     # Flipping labels as originally 1 is non anamoly
     labels = (~labels.astype(bool)).astype(int)
     if save_examples:
-        vis_results(pred_images,labels,dists,imgs=imgs)
-    return dists,labels
+        vis_results(pred_images,labels,probs,imgs=imgs)
+    return probs,labels
 
 
 def get_kde_probs(model,save_examples=True):
     print(f"Getting Data!!")
     train_loader,val_loader,_=get_data(8)
     train_features,_=get_features(model,train_loader)
-    print(f"Train features shape is {train_features.shape}")
     mu, var = estimate_gaussian(train_features)  
-    dists,labels=get_kdes(model,val_loader,save_examples=save_examples)
+    #print(f"Estimated mean is {mu}")
+    #print(f"Estimated var is {var}")
+    p_train = multivariate_gaussian(train_features, mu, var)
+    #train_features=train_features.transpose(1,0)+1
+    #print(f"Train features min and max are {train_features.min(),train_features.max()}")
+    #print(f"Train features shape is {train_features.shape}")
+    #print(f"Fitting KDE Kernel!!")
+    #kernel = stats.gaussian_kde(train_features)
+    #print(f"Fitting complete of KDE Kernel!!")
+    #probs,labels=get_kdes(model,val_loader,kernel,save_examples=save_examples)
+    probs,labels=get_kdes(model,val_loader,(mu,var),save_examples=save_examples)
     if not save_examples:
-        epsilon, F1 = select_threshold(labels, dists,reverse=True)
+        epsilon, F1 = select_threshold(labels, probs,reverse=False)
         print('Best epsilon found using cross-validation: %e' % epsilon)
         print('Best F1 on Cross Validation Set: %f' % F1)
     return dists,labels
@@ -169,8 +187,12 @@ if __name__=="__main__":
     print(f"Getting Model!!")
     weights="./ckpts/anamoly_road_512/lightning_logs/version_1/checkpoints/epoch=30-step=90892.ckpt"
     model = Autoencoder.load_from_checkpoint(weights)
-    dists,labels=get_reconstruction_dist(model,save_examples=False)
-    dists,labels=get_reconstruction_dist(model,save_examples=True)
+    #dists,labels=get_reconstruction_dist(model,save_examples=False)
+    #dists,labels=get_reconstruction_dist(model,save_examples=True)
+
+    get_kde_probs(model,save_examples=False)
+
+
     #y=np.arange(len(dists))
     #print(f"Min and Max dists are {dists.min(),dists.max()}")
     #color= ['green' if l == 0 else 'red' for l in labels]
