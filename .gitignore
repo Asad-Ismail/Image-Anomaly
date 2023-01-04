@@ -1,7 +1,10 @@
 *.pyc
-*.ipynb_checkpoints
+*.ipynb_checkpoints/*
 *__pycache__/
 *.tfevent*
 *.pth
 *.ckpt
 *.npy
+*__pycache__/*
+*__pycache__
+*.ipynb_checkpoints
