@@ -16,13 +16,13 @@ import timm
 class Encoder(nn.Module):
     def __init__(self,minvalue=1.0):
         super().__init__()
-        self.encoder = timm.create_model('vgg19_bn',features_only=True, pretrained=False)
-        self.minval=minvalue
+        self.encoder = timm.create_model('vgg19_bn',features_only=True, pretrained=True)
+        self.minvalue=minvalue
     def forward(self, x):
         x=self.encoder(x)[-1]
         x=x.mean((2,3),keepdim=True)
         ## Rescale min values so the deterrminant of matrix does not becomes zero
-        return x+self.minval
+        return x+self.minvalue
 
 class Decoder(nn.Module):
     """Decoder"""
@@ -167,14 +167,15 @@ class Autoencoder(pl.LightningModule):
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer,
                                                          mode='min',
                                                          factor=0.2,
-                                                         patience=20,
+                                                         patience=10,
                                                          min_lr=5e-5)
         return {"optimizer": optimizer, "lr_scheduler": scheduler, "monitor": "val_loss"}
 
     def training_step(self, batch, batch_idx):
-        loss1 = self._get_reconstruction_loss(batch)
-        loss2 = self._get_inception_loss(batch)
-        loss=loss1+loss2
+        #loss1 = self._get_reconstruction_loss(batch)
+        #loss2 = self._get_inception_loss(batch)
+        #loss=loss1+loss2
+        loss = self._get_reconstruction_loss(batch)
         self.log('train_loss', loss)
         return loss
 
