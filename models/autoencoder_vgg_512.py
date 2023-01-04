@@ -14,7 +14,7 @@ import timm
 
 
 class Encoder(nn.Module):
-    def __init__(self,minvalue=1):
+    def __init__(self,minvalue=1.0):
         super().__init__()
         self.encoder = timm.create_model('vgg19_bn',features_only=True, pretrained=False)
         self.minval=minvalue
