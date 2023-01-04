@@ -17,5 +17,5 @@ We mainly Implement two Methods for Image Anamoly Detection for both of the meth
 <p align="center">
   <img alt="Light" src="vis_imgs/usa_driving.jpg" width="45%">
 &nbsp; &nbsp; &nbsp; &nbsp;
-  <img alt="Dark" src="vis_imgs/indian_driving" width="45%">
+  <img alt="Dark" src="vis_imgs/indian_driving.jpg" width="45%">
 </p>
