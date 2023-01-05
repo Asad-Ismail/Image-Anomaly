@@ -4,6 +4,20 @@ import torch
 
 
 def get_train_images(dataset,num):
+    """
+    Extract a specified number of images from a given dataset.
+
+    This function extracts a specified number of images from a given dataset and returns them as a stack of
+    tensors.
+
+    Args:
+    dataset (torch.utils.data.Dataset): The dataset to extract images from.
+    num (int): The number of images to extract.
+
+    Returns:
+    torch.Tensor: A stack of the extracted images, with size (num, C, H, W) where C is the number of
+    channels, H is the image height, and W is the image width.
+    """
     return torch.stack([dataset[i][0] for i in range(num)], dim=0)
 
 
