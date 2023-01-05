@@ -3,6 +3,17 @@ import torch
 import torchvision
 
 class GenerateCallback(pl.Callback):
+    """
+    A PyTorch Lightning callback for reconstructing and logging images during training.
+
+    This callback reconstructs a set of input images using the model at the end of each training epoch,
+    and logs the reconstructions to TensorBoard. The reconstructions are only logged every N epochs,
+    where N is specified by the every_n_epochs parameter.
+
+    Args:
+    input_imgs (torch.Tensor): Images to reconstruct during training.
+    every_n_epochs (int, optional): Only save reconstructions every N epochs. Default is 1.
+    """
 
     def __init__(self, input_imgs, every_n_epochs=1):
         super().__init__()
