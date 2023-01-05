@@ -115,6 +115,21 @@ def get_recons_loss(model,dloader,save_examples=True,imgs=20):
 
 
 def get_reconstruction_dist(model,save_examples=True):
+    """
+    Compute the reconstruction loss for a given model and data.
+
+    This function computes the reconstruction loss for a given model on a given dataset, and returns the
+    losses and labels. Optionally, it can also save examples of the reconstructions.
+
+    Args:
+    model (torch.nn.Module): The model to use for reconstruction.
+    save_examples (bool, optional): Whether to save examples of the reconstructions. Default is True.
+
+    Returns:
+    tuple: A tuple containing the following elements:
+    - dists (List[float]): A list of reconstruction losses.
+    - labels (List[int]): A list of labels for the data (0 for normal, 1 for anomalous).
+    """
     print(f"Getting Data!!")
     train_loader,val_loader,_=get_data(8)
     dists,labels=get_recons_loss(model,val_loader,save_examples=save_examples)
