@@ -14,7 +14,7 @@ import timm
 
 
 class Encoder(nn.Module):
-    def __init__(self,minvalue=1.0):
+    def __init__(self,minvalue=9e-1):
         super().__init__()
         self.encoder = timm.create_model('vgg19_bn',features_only=True, pretrained=True)
         self.minvalue=minvalue
@@ -42,6 +42,23 @@ class Decoder(nn.Module):
         inter1=c_hid//2
         inter2=inter1//2
         inter3=inter2//2
+
+        hidconvs=[]
+        for _ in range(5):
+            hidconvs.append(nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1))
+            hidconvs.append(act_fn())
+        inter1convs=[]
+        for _ in range(5):
+            inter1convs.append(nn.Conv2d(inter1, inter1, kernel_size=3, padding=1))
+            inter1convs.append(act_fn())
+        inter2convs=[]
+        for _ in range(5):
+            inter2convs.append(nn.Conv2d(inter2, inter2, kernel_size=3, padding=1))
+            inter2convs.append(act_fn())
+        inter3convs=[]
+        for _ in range(5):
+            inter3convs.append(nn.Conv2d(inter3, inter3, kernel_size=3, padding=1))
+            inter3convs.append(act_fn())
         
         self.net = nn.Sequential(
             nn.ConvTranspose2d(c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2), # 16x16 => 32x32
@@ -50,54 +67,16 @@ class Decoder(nn.Module):
             act_fn(),
             nn.ConvTranspose2d(c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2), # 16x16 => 32x32
             act_fn(),
-            nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
-            act_fn(),
+            *hidconvs,
             nn.ConvTranspose2d(c_hid, inter1, kernel_size=3, output_padding=1, padding=1, stride=2), # 32x32 => 64x64
             act_fn(),
-            nn.Conv2d(inter1, inter1, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter1, inter1, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter1, inter1, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter1, inter1, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter1, inter1, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter1, inter1, kernel_size=3, padding=1),
-            act_fn(),
+            *inter1convs,
             nn.ConvTranspose2d( inter1, inter2, kernel_size=3, output_padding=1, padding=1, stride=2), # 64x64 => 128x128
             act_fn(),
-            nn.Conv2d(inter2, inter2, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter2, inter2, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter2, inter2, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter2, inter2, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter2, inter2, kernel_size=3, padding=1),
-            act_fn(),
+            *inter2convs,
             nn.ConvTranspose2d(inter2, inter3, kernel_size=3, output_padding=1, padding=1, stride=2), # 128x128 => 256x256
             act_fn(),
-            nn.Conv2d(inter3, inter3, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter3, inter3, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter3, inter3, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter3, inter3, kernel_size=3, padding=1),
-            act_fn(),
-            nn.Conv2d(inter3, inter3, kernel_size=3, padding=1),
-            act_fn(),
+            *inter3convs,
             nn.ConvTranspose2d(inter3, num_input_channels, kernel_size=3, output_padding=1, padding=1, stride=2), # 256x256 => 512x512
             act_fn(),
             nn.Conv2d(num_input_channels, num_input_channels, kernel_size=3, padding=1),
@@ -149,7 +128,7 @@ class Autoencoder(pl.LightningModule):
     @torch.no_grad()
     def _get_inception(self,x):
         z=self.inception(x)[-1]
-        z=z.mean((2,3),keepdim=True)+self.encoder.minval
+        z=z.mean((2,3),keepdim=True)+self.encoder.minvalue
         return z
     
     def _get_inception_loss(self,batch):
@@ -172,10 +151,10 @@ class Autoencoder(pl.LightningModule):
         return {"optimizer": optimizer, "lr_scheduler": scheduler, "monitor": "val_loss"}
 
     def training_step(self, batch, batch_idx):
-        #loss1 = self._get_reconstruction_loss(batch)
-        #loss2 = self._get_inception_loss(batch)
-        #loss=loss1+loss2
-        loss = self._get_reconstruction_loss(batch)
+        loss1 = self._get_reconstruction_loss(batch)
+        loss2 = self._get_inception_loss(batch)
+        loss=loss1+loss2
+        #loss = self._get_reconstruction_loss(batch)
         self.log('train_loss', loss)
         return loss
 
