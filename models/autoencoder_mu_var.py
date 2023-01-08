@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
 import torch.optim as optim
+from torch import Tensor
 # Torchvision
 import torchvision
 from torchvision import transforms
@@ -14,15 +15,17 @@ import timm
 
 
 class Encoder(nn.Module):
-    def __init__(self,minvalue=0):
+    def __init__(self,dims=512):
         super().__init__()
         self.encoder = timm.create_model('vgg19_bn',features_only=True, pretrained=True)
-        self.minvalue=minvalue
+        self.fc_mu = nn.Linear(dims, dims)
+        self.fc_var = nn.Linear(dims, dims)
     def forward(self, x):
         x=self.encoder(x)[-1]
-        x=x.mean((2,3),keepdim=True)
-        ## Rescale min values so the deterrminant of matrix does not becomes zero
-        return x
+        x=x.mean((2,3))
+        mu = self.fc_mu(x)
+        log_var = self.fc_var(x)
+        return (mu, log_var)
 
 class Decoder(nn.Module):
     """Decoder"""
@@ -111,7 +114,9 @@ class Autoencoder(pl.LightningModule):
         """
         The forward function takes in an image and returns the reconstructed image
         """
-        z = self.encoder(x)
+        mu, log_var = self.encoder(x)
+        z = self.reparameterize(mu, log_var)
+        z= z.reshape(z.shape[0],-1,1,1)
         x_hat = self.decoder(z)
         return x_hat
 
@@ -124,21 +129,19 @@ class Autoencoder(pl.LightningModule):
         loss = F.mse_loss(x, x_hat, reduction="none")
         loss = loss.sum(dim=[1,2,3]).mean(dim=[0])
         return loss
-    
-    @torch.no_grad()
-    def _get_inception(self,x):
-        z=self.inception(x)[-1]
-        z=z.mean((2,3),keepdim=True)
-        return z
-    
-    def _get_inception_loss(self,batch):
-        x, _ = batch # We do not need the labels
-        z_hat = self.encoder(x)
-        z=self._get_inception(x)
-        loss = F.mse_loss(z, z_hat, reduction="none")
-        loss = loss.sum(dim=[1,2,3]).mean(dim=[0])
-        return loss
 
+    def reparameterize(self, mu: Tensor, logvar: Tensor) -> Tensor:
+        """
+        Reparameterization trick to sample from N(mu, var) from
+        N(0,1).
+        :param mu: (Tensor) Mean of the latent Gaussian [B x D]
+        :param logvar: (Tensor) Standard deviation of the latent Gaussian [B x D]
+        :return: (Tensor) [B x D]
+        """
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return eps * std + mu
+    
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=1e-3)
         # Using a scheduler is optional but can be helpful.
@@ -151,10 +154,10 @@ class Autoencoder(pl.LightningModule):
         return {"optimizer": optimizer, "lr_scheduler": scheduler, "monitor": "val_loss"}
 
     def training_step(self, batch, batch_idx):
-        loss1 = self._get_reconstruction_loss(batch)
-        loss2 = self._get_inception_loss(batch)
-        loss=loss1+loss2
-        #loss = self._get_reconstruction_loss(batch)
+        #loss1 = self._get_reconstruction_loss(batch)
+        #loss2 = self._get_inception_loss(batch)
+        #loss=loss1+loss2
+        loss = self._get_reconstruction_loss(batch)
         self.log('train_loss', loss)
         return loss
 
@@ -168,14 +171,7 @@ class Autoencoder(pl.LightningModule):
 
 if __name__=="__main__":
     #model=Autoencoder(latent_dim=512)
-    x=torch.rand(1,3,128,128)
+    x=torch.rand(2,3,128,128)
     model=Autoencoder(512)
     y=model(x)
     print(y.shape)
-    #y=model(x)
-    #model_names = timm.list_models('*vgg*')
-    #print(model_names)
-    #encoder = timm.create_model('vgg19_bn',features_only=True, pretrained=True)
-    #o = encoder(torch.randn(2, 3, 128, 128))
-    #for x in o:
-    #    print(x.shape)
