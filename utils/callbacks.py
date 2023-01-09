@@ -26,7 +26,7 @@ class GenerateCallback(pl.Callback):
             input_imgs = self.input_imgs.to(pl_module.device)
             with torch.no_grad():
                 pl_module.eval()
-                reconst_imgs = pl_module(input_imgs)
+                reconst_imgs,mu,logvar = pl_module(input_imgs)
                 pl_module.train()
             # Plot and add to tensorboard
             imgs = torch.stack([input_imgs, reconst_imgs], dim=1).flatten(0,1)

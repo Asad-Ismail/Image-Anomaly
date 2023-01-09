@@ -1,4 +1,4 @@
-from models.autoencoder_vgg_512 import *
+from models.autoencoder_mu_var import *
 from utils.callbacks import *
 from data.dataloader import *
 from utils.utils import *
@@ -11,7 +11,7 @@ parser.add_argument("--dataset",default="hub://aismail2/cucumber_OD",help="Activ
 parser.add_argument("--size",default=512,type=int,help="Image size used for training model")
 parser.add_argument("--epochs",default=1000,type=int,help="Image size used for training model")
 parser.add_argument("--device", default="cuda",help="Device to Train Model")
-parser.add_argument("--batch_sz", default=42,type=int,help="Device to Train Model")
+parser.add_argument("--batch_sz", default=128,type=int,help="Device to Train Model")
 parser.add_argument("--model_arch",default="repvggplus", choices=['resnet', 'repvgg','repvggplus'],type=str,help="Model Architecture")
 parser.add_argument("--ckpt_path",default="./ckpts",type=str,help="Output of weights")
 

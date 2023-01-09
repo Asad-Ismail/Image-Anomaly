@@ -118,16 +118,22 @@ class Autoencoder(pl.LightningModule):
         z = self.reparameterize(mu, log_var)
         z= z.reshape(z.shape[0],-1,1,1)
         x_hat = self.decoder(z)
-        return x_hat
+        return x_hat,mu,log_var
 
     def _get_reconstruction_loss(self, batch):
         """
         Given a batch of images, this function returns the reconstruction loss (MSE in our case)
         """
         x, _ = batch # We do not need the labels
-        x_hat = self.forward(x)
+        x_hat,mu,log_var = self.forward(x)
         loss = F.mse_loss(x, x_hat, reduction="none")
-        loss = loss.sum(dim=[1,2,3]).mean(dim=[0])
+        recons_loss  = loss.sum(dim=[1,2,3]).mean(dim=[0])
+
+        kld_weight = 1.0 # Account for the minibatch samples from the dataset
+        #recons_loss =F.mse_loss(recons, input)
+        kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1), dim = 0)
+        loss = recons_loss + kld_weight * kld_loss
+
         return loss
 
     def reparameterize(self, mu: Tensor, logvar: Tensor) -> Tensor:

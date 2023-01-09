@@ -157,9 +157,7 @@ def get_kdes(model,dloader,kernel,save_examples=True,imgs=200000):
             mu,var=kernel
             prob=multivariate_gaussian(z, mu, var)
         else:
-            print("kkkk")
             z=z.transpose(1,0)
-            print(z.shape)
 
             prob=kernel(z)
         probs.append(prob)
