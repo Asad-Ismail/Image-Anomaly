@@ -1,0 +1,43 @@
+name: "Docs"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: "Build MkDocs"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: Install deploy dependencies.
+        run: pip3 install mkdocs mkdocs-material mkdocs-static-i18n mkdocs-glightbox
+      - name: Install Poetry
+        run: python -m pip install --upgrade poetry
+      - name: Poetry install dependencies
+        run: poetry install
+
+      - run: poetry run mkdocs build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: site
+          path: site/
+
+  deploy:
+    name: "Publish Docs"
+    needs: build
+    
+    uses: bayer-int/actions-workflows/.github/workflows/publish-docs.yml@main
+    with:
+      artifact:   site
+      dir:        site
+      invalidate: true
+      preview: ${{ github.ref != 'refs/heads/main' && github.run_id || '' }}
+      namespace:  'vegPheno' # to invalidate cache for namespaces

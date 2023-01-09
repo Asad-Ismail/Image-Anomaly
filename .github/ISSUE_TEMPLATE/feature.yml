@@ -1,0 +1,35 @@
+name: Propose Feature
+description: A new feature which would give an improvement
+title: "<title>"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for filing a feature proposal! Please check the open issues to ensure the feature has not been proposed yet.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature Area
+      options:
+      - Website behaviour
+      - Automation (Provisioning)
+      - Template Repository
+      - Other
+    validations:
+      required: false
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Description of the feature
+      description: Tell us what feature you would like to see
+    validations:
+      required: true
+  - type: textarea
+    id: benifit
+    attributes:
+      label: Benefits of the feature
+      description: Describe how this feature would benifit users and who this feature is meant for.
+    validations:
+      required: false
+

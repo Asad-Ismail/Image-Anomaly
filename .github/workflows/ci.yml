@@ -1,0 +1,36 @@
+---
+name: CI
+'on':
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the codebase.
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js.
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Setup Python 3.
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: |
+          npm install --location=global markdownlint-cli cspell
+          pip3 install yamllint
+      - name: Lint code.
+        run: |
+          markdownlint README.md
+          markdownlint docs/**/*.md
+          yamllint mkdocs.yml

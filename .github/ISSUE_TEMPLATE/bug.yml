@@ -1,0 +1,50 @@
+name: Report Bug
+description: Describe an unexpected behaviour or error.
+title: "<title>"
+labels: ["bug"]
+body:  
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for filing a bug report! Please check the open issues to ensure the bug has not been reported yet.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Error Area
+      options:
+      - Website behaviour
+      - Automation (Provisioning)
+      - Template Repository
+      - Other    
+    validations:
+      required: true  
+  - type: input
+    id: repository
+    attributes:
+      label: Affected Repository (if applicable)
+      description: Affected 
+      placeholder: ex. devops-docs-example
+    validations:
+      required: false
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Description of the bug
+      description: Tell us what bug you encountered and what should have happened
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps To Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: Please write the steps in a list form
+    validations:
+      required: false
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution
+      description: If you have an idea how this bug could be fixed, feel free to share.
+    validations:
+      required: false

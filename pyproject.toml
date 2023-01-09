@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "VegRD_APD_Fruit_Phenotyping"
+version = "1.0.0"
+description = "vegetabel Phenotyping repository"
+
+authors = ["Asad Ismail <asad.ismail@bayer.com>"]
+
+readme = 'README.md'
+
+repository = "https://github.com/bayer-int/VegRD_APD_Fruit_Phenotyping"
+homepage = "https://docs.int.bayer.com/-/VegRD_APD_Fruit_Phenotyping/"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+mkdocs = "^1.2.3"
+mkdocs-material = "^8.1.9"
+mkdocs-git-revision-date-localized-plugin = "^0.11.1"
+mkdocs-static-i18n= "*"
+mkdocs-glightbox= "*"
+mkdocstrings-python ="*"
+
+[build.system]
+requires = ["poetry-core>=1.0.0"]
+
