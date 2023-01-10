@@ -1,6 +1,6 @@
 from utils.utils import *
 from data.dataloader import *
-from models.autoencoder_vgg_512 import *
+from models.autoencoder_mu_var import *
 import numpy as np
 from tqdm import tqdm
 import scipy
@@ -23,6 +23,18 @@ def estimate_gaussian(X):
     var= np.var(X,axis=0) 
     return mu, var
 
+def reparameterize(mu: Tensor, logvar: Tensor) -> Tensor:
+    """
+    Reparameterization trick to sample from N(mu, var) from
+    N(0,1).
+    :param mu: (Tensor) Mean of the latent Gaussian [B x D]
+    :param logvar: (Tensor) Standard deviation of the latent Gaussian [B x D]
+    :return: (Tensor) [B x D]
+    """
+    std = torch.exp(0.5 * logvar)
+    eps = torch.randn_like(std)
+    return eps * std + mu
+
 def get_features(model,dloader,keepk=None):
     ## Train features for checking 
     features=[]
@@ -35,12 +47,11 @@ def get_features(model,dloader,keepk=None):
         model.eval()
         x=x.cuda()
         #x=x.unsqueeze(0)
-        y=model.encoder(x).detach().cpu()
-        features.append(y.flatten(start_dim=1).numpy())
+        mu,logvar=model.encoder(x)
+        z=reparameterize(mu, logvar).detach().cpu()
+        features.append(z.flatten(start_dim=1).numpy())
         labels.append(label)
     features=np.concatenate(features,axis=0)
-    if keepk:
-        features=features[:,:keepk]
     labels=np.concatenate(labels,axis=0)
     return features,labels
 
@@ -175,21 +186,23 @@ def get_kdes(model,dloader,kernel,save_examples=True,imgs=200000):
 
 def get_kde_probs(model,save_examples=True):
     print(f"Getting Data!!")
-    train_loader,val_loader,_=get_data(8)
-    train_features,_=get_features(model,train_loader)
-    print(f"Train features min and max are  {train_features.min()}, {train_features.max()}")
-    mu, var = estimate_gaussian(train_features)  
-    print(sum(np.where(var<0.1)))
-    print(f"Features and Var shape is {train_features.shape}, {var.shape}")
-    print(f"Estimated var min and max are {var.min()}, {var.max()}")
+    import seaborn as sns
+    train_loader,val_loader,_=get_data(2)
+    features,_=get_features(model,train_loader)
+    print(f"Features shape is {features.shape}")
+    sns.histplot(features[:,30],binrange=(-5,5))
+    plt.savefig("test.png")
+    
+    #mu, var = estimate_gaussian(train_features)  
     #p_train = multivariate_gaussian(train_features, mu, var)
-    #train_features=train_features.transpose(1,0)
+    features=features.transpose(1,0)
     #print(f"Train features min and max are {train_features.min(),train_features.max()}")
     #print(f"Train features shape is {train_features.shape}")
-    print(f"Fitting KDE Kernel!!")
-    train_features=train_features.transpose(1,0)
-    kernel = stats.gaussian_kde(train_features)
+    #print(f"Fitting KDE Kernel!!")
+    #train_features=train_features.transpose(1,0)
+    kernel = stats.gaussian_kde(features)
     print(f"Fitting complete of KDE Kernel!!")
+    
     probs,labels=get_kdes(model,val_loader,kernel,save_examples=save_examples)
     return
     probs,labels=get_kdes(model,val_loader,(mu,var),save_examples=save_examples)
@@ -204,7 +217,7 @@ def get_kde_probs(model,save_examples=True):
 
 if __name__=="__main__":
     print(f"Getting Model!!")
-    weights="./ckpts/anamoly_road_512/lightning_logs/version_1/checkpoints/epoch=82-step=243356.ckpt"
+    weights="./ckpts/anamoly_road_512/lightning_logs/version_1/checkpoints/epoch=209-step=202020.ckpt"
     model = Autoencoder.load_from_checkpoint(weights)
     #dists,labels=get_reconstruction_dist(model,save_examples=False)
     #dists,labels=get_reconstruction_dist(model,save_examples=True)
