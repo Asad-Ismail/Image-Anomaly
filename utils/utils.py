@@ -33,10 +33,10 @@ def multivariate_gaussian(X, mu, var):
     
     k = len(mu)
     
-    if np.min(var)<1e-2:
-        print(f"Det of orig var is {np.linalg.det(np.diag(var))}")
-        var+=1
-        print(f"Det of Mod var is {np.linalg.det(np.diag(var))}")
+    #if np.min(var)<1e-2:
+    #    print(f"Det of orig var is {np.linalg.det(np.diag(var))}")
+    #    var+=1
+    #    print(f"Det of Mod var is {np.linalg.det(np.diag(var))}")
 
     if var.ndim == 1:
         var = np.diag(var)

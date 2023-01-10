@@ -37,7 +37,8 @@ def reparameterize(mu: Tensor, logvar: Tensor) -> Tensor:
 
 def get_features(model,dloader,keepk=None):
     ## Train features for checking 
-    features=[]
+    features_mu=[]
+    features_std=[]
     labels=[]
     for i,item in tqdm(enumerate(tqdm(dloader))):
         x,label=item[0],item[1]
@@ -48,13 +49,21 @@ def get_features(model,dloader,keepk=None):
         x=x.cuda()
         #x=x.unsqueeze(0)
         mu,logvar=model.encoder(x)
-        #std = torch.exp(0.5 * logvar)
-        z=reparameterize(mu, logvar).detach().cpu()
-        features.append(z.flatten(start_dim=1).numpy())
+        std = torch.exp(0.5 * logvar)
+        #z=reparameterize(mu, logvar).detach().cpu()
+        features_mu.append(mu.flatten(start_dim=1).detach().cpu().numpy())
+        features_std.append(std.flatten(start_dim=1).detach().cpu().numpy())
         labels.append(label)
-    features=np.concatenate(features,axis=0)
+    features_mu=np.concatenate(features_mu,axis=0)
+    features_std=np.concatenate(features_std,axis=0)
     labels=np.concatenate(labels,axis=0)
-    return features,labels
+
+    mean=np.average(features_mu , axis=0)
+    std=np.average(features_std , axis=0)
+
+    print(f"Mean mean shape is {mean.shape} ")
+    print(f"Std mean shape is {std.shape} ")
+    return mean,std,labels
 
 def fit_gaussian_latent(model):
     """Proper way to do it with gaussian fitting if determiant of variance is well defined"""
@@ -124,8 +133,6 @@ def get_recons_loss(model,dloader,save_examples=True,imgs=20):
         vis_results(pred_images,labels,dists,imgs=imgs)
     return dists,labels
 
-
-
 def get_reconstruction_dist(model,save_examples=True):
     """
     Compute the reconstruction loss for a given model and data.
@@ -143,7 +150,7 @@ def get_reconstruction_dist(model,save_examples=True):
     - labels (List[int]): A list of labels for the data (0 for normal, 1 for anomalous).
     """
     print(f"Getting Data!!")
-    train_loader,val_loader,_=get_data(8)
+    train_loader,val_loader,_=get_data(128)
     dists,labels=get_recons_loss(model,val_loader,save_examples=save_examples)
     if not save_examples:
         epsilon, F1 = select_threshold(labels, dists,reverse=True)
@@ -163,14 +170,17 @@ def get_kdes(model,dloader,kernel,save_examples=True,imgs=200000):
         model.cuda()
         model.eval()
         x=x.cuda()
-        z=model.encoder(x).detach().cpu().flatten(start_dim=1).numpy()
+
+        mu,logvar=model.encoder(x)
+        z=reparameterize(mu, logvar).detach().cpu()
         pred_image=model(x).detach().cpu()
+
         if isinstance(kernel,tuple):
             mu,var=kernel
             prob=multivariate_gaussian(z, mu, var)
+            print("prob shape is {prob.shape}")
         else:
             z=z.transpose(1,0)
-
             prob=kernel(z)
         probs.append(prob)
         labels.append(label.numpy())
@@ -188,7 +198,7 @@ def get_kdes(model,dloader,kernel,save_examples=True,imgs=200000):
 def get_kde_probs(model,save_examples=True):
     print(f"Getting Data!!")
     import seaborn as sns
-    train_loader,val_loader,_=get_data(2)
+    train_loader,val_loader,_=get_data(128)
     features,_=get_features(model,train_loader)
     print(f"Features shape is {features.shape}")
     sns.histplot(features[:,30],binrange=(-5,5))
@@ -197,6 +207,7 @@ def get_kde_probs(model,save_examples=True):
     #mu, var = estimate_gaussian(train_features)  
     #p_train = multivariate_gaussian(train_features, mu, var)
     features=features.transpose(1,0)
+    print(f"Features shape is {features.shape}")
     #print(f"Train features min and max are {train_features.min(),train_features.max()}")
     #print(f"Train features shape is {train_features.shape}")
     #print(f"Fitting KDE Kernel!!")
