@@ -48,6 +48,7 @@ def get_features(model,dloader,keepk=None):
         x=x.cuda()
         #x=x.unsqueeze(0)
         mu,logvar=model.encoder(x)
+        #std = torch.exp(0.5 * logvar)
         z=reparameterize(mu, logvar).detach().cpu()
         features.append(z.flatten(start_dim=1).numpy())
         labels.append(label)
@@ -202,7 +203,9 @@ def get_kde_probs(model,save_examples=True):
     #train_features=train_features.transpose(1,0)
     kernel = stats.gaussian_kde(features)
     print(f"Fitting complete of KDE Kernel!!")
-    
+    prob=kernel(features)
+    print(f"Probs shape is {prob.shape}")
+
     probs,labels=get_kdes(model,val_loader,kernel,save_examples=save_examples)
     return
     probs,labels=get_kdes(model,val_loader,(mu,var),save_examples=save_examples)
