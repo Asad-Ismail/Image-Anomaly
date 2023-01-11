@@ -12,6 +12,7 @@ Detect Anamoly based on Reconstruction loss of Autoencoder
 
 ##Kernel Density based
 LAKE Model
+
 Fit multinomial gaussian/ KDE on latent variable and find the anamly based on PDF
 
 
