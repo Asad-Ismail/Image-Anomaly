@@ -13,6 +13,9 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 import timm
 
 
+def relative_euclidean_distance(a, b):
+    return (a-b).norm(2, dim=1) / a.norm(2, dim=1)
+
 
 class Encoder(nn.Module):
     def __init__(self,dims=512):
@@ -109,6 +112,12 @@ class Autoencoder(pl.LightningModule):
         self.inception= timm.create_model('vgg19_bn',features_only=True, pretrained=True)
         # Example input array needed for visualizing the graph of the network
         self.example_input_array = torch.zeros(2, num_input_channels, width, height)
+
+    def get_VAE_features(self,x,xhat):
+        rec_euclidean = relative_euclidean_distance(x, xhat)
+        rec_cosine = F.cosine_similarity(input_data, dec, dim=1)
+        enc = torch.cat([enc, rec_euclidean.unsqueeze(-1), rec_cosine.unsqueeze(-1)], dim=1)
+        return enc
 
     def forward(self, x):
         """
