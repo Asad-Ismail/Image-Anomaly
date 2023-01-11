@@ -11,7 +11,7 @@ We mainly Implement two Methods for Image Anamoly Detection for both of the meth
 Detect Anamoly based on Reconstruction loss of Autoencoder
 
 ##Kernel Density based
-
+LAKE Model
 Fit multinomial gaussian/ KDE on latent variable and find the anamly based on PDF
 
 
