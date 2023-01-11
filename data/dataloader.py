@@ -19,8 +19,8 @@ def get_data(batch_sz=32):
     - val_loader (torch.utils.data.DataLoader): DataLoader for the validation data.
     - train_dataset (torch.utils.data.Dataset): Dataset for the training data.
     """
-    train_dir = '../AnamolyData/train/images'
-    val_dir= '../AnamolyData/val/images'
+    train_dir = '../../AnamolyData/train/images'
+    val_dir= '../../AnamolyData/val/images'
     transform = transforms.Compose([transforms.Resize((128,128)),
                                     transforms.ToTensor(),
                                     transforms.Normalize([0.5, 0.5, 0.5], 

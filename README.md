@@ -6,8 +6,13 @@ Anamoly here is a very losse open ended term which can means for example if we s
 
 We mainly Implement two Methods for Image Anamoly Detection for both of the methods we first train an autoencoder to map the image to higher level representation and
 
-1) Detect Anamoly based on Reconstruction loss of Autoencoder
-2) Fit multinomial gaussian/ KDE on latent variable and find the anamly based on PDF
+##Reconstruction based
+
+Detect Anamoly based on Reconstruction loss of Autoencoder
+
+##Kernel Density based
+
+Fit multinomial gaussian/ KDE on latent variable and find the anamly based on PDF
 
 
 ## Examples

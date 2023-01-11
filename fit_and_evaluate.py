@@ -163,25 +163,20 @@ def get_kdes(model,dloader,kernel,save_examples=True,imgs=200000):
     probs=[]
     labels=[]
     pred_images=[]
+    model.cuda()
+    model.eval()
+    mu,var=kernel
     for i,item in tqdm(enumerate(tqdm(dloader))):
         x,label=item[0],item[1]
         if (save_examples and i>imgs):
             break
-        model.cuda()
-        model.eval()
         x=x.cuda()
-
-        mu,logvar=model.encoder(x)
-        z=reparameterize(mu, logvar).detach().cpu()
-        pred_image=model(x).detach().cpu()
-
+        pred_image,predmu,pred_logvar=model(x)
+        z=reparameterize(predmu, pred_logvar).detach().cpu().numpy()
         if isinstance(kernel,tuple):
             mu,var=kernel
             prob=multivariate_gaussian(z, mu, var)
-            print("prob shape is {prob.shape}")
-        else:
-            z=z.transpose(1,0)
-            prob=kernel(z)
+            print(probs)
         probs.append(prob)
         labels.append(label.numpy())
         if save_examples:
@@ -195,31 +190,31 @@ def get_kdes(model,dloader,kernel,save_examples=True,imgs=200000):
     return probs,labels
 
 
-def get_kde_probs(model,save_examples=True):
+def get_kde_probs(model,save_examples=False):
     print(f"Getting Data!!")
-    import seaborn as sns
-    train_loader,val_loader,_=get_data(128)
-    features,_=get_features(model,train_loader)
-    print(f"Features shape is {features.shape}")
-    sns.histplot(features[:,30],binrange=(-5,5))
-    plt.savefig("test.png")
+    #import seaborn as sns
+    train_loader,val_loader,_=get_data(8)
+    mean,var,_=get_features(model,train_loader)
+    #print(f"Features shape is {features.shape}")
+    #sns.histplot(features[:,30],binrange=(-5,5))
+    #plt.savefig("test.png")
     
     #mu, var = estimate_gaussian(train_features)  
     #p_train = multivariate_gaussian(train_features, mu, var)
-    features=features.transpose(1,0)
-    print(f"Features shape is {features.shape}")
+    #features=features.transpose(1,0)
+    #print(f"Features shape is {features.shape}")
     #print(f"Train features min and max are {train_features.min(),train_features.max()}")
     #print(f"Train features shape is {train_features.shape}")
     #print(f"Fitting KDE Kernel!!")
     #train_features=train_features.transpose(1,0)
-    kernel = stats.gaussian_kde(features)
-    print(f"Fitting complete of KDE Kernel!!")
-    prob=kernel(features)
-    print(f"Probs shape is {prob.shape}")
-
+    #kernel = stats.gaussian_kde(features)
+    #print(f"Fitting complete of KDE Kernel!!")
+    #prob=kernel(features)
+    #print(f"Probs shape is {prob.shape}")
+    kernel=(mean,var)
     probs,labels=get_kdes(model,val_loader,kernel,save_examples=save_examples)
-    return
-    probs,labels=get_kdes(model,val_loader,(mu,var),save_examples=save_examples)
+    #return
+    #probs,labels=get_kdes(model,val_loader,(mu,var),save_examples=save_examples)
     if not save_examples:
         epsilon, F1 = select_threshold(labels, probs,reverse=False)
         print('Best epsilon found using cross-validation: %e' % epsilon)
