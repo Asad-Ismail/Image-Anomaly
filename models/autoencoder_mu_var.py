@@ -13,8 +13,8 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 import timm
 
 
-def relative_euclidean_distance(a, b):
-    return (a-b).norm(2, dim=1) / a.norm(2, dim=1)
+def relative_euclidean_distance(pred, gt):
+    return (pred-gt).norm(2,dim=1) / pred.norm(2,dim=1)
 
 
 class Encoder(nn.Module):
@@ -28,7 +28,7 @@ class Encoder(nn.Module):
         x=x.mean((2,3))
         mu = self.fc_mu(x)
         log_var = self.fc_var(x)
-        return (mu, log_var)
+        return (x,mu,log_var)
 
 class Decoder(nn.Module):
     """Decoder"""
@@ -112,10 +112,11 @@ class Autoencoder(pl.LightningModule):
         self.inception= timm.create_model('vgg19_bn',features_only=True, pretrained=True)
         # Example input array needed for visualizing the graph of the network
         self.example_input_array = torch.zeros(2, num_input_channels, width, height)
-
-    def get_VAE_features(self,x,xhat):
-        rec_euclidean = relative_euclidean_distance(x, xhat)
-        rec_cosine = F.cosine_similarity(input_data, dec, dim=1)
+    
+    @torch.no_grad()
+    def get_test_features(self,enc,x,xhat):
+        rec_euclidean = relative_euclidean_distance(x.flatten(start_dim=1), xhat.flatten(start_dim=1))
+        rec_cosine = F.cosine_similarity(x.flatten(start_dim=1), xhat.flatten(start_dim=1),dim=1)
         enc = torch.cat([enc, rec_euclidean.unsqueeze(-1), rec_cosine.unsqueeze(-1)], dim=1)
         return enc
 
@@ -123,11 +124,15 @@ class Autoencoder(pl.LightningModule):
         """
         The forward function takes in an image and returns the reconstructed image
         """
-        mu, log_var = self.encoder(x)
+        enc,mu, log_var = self.encoder(x)
         z = self.reparameterize(mu, log_var)
         z= z.reshape(z.shape[0],-1,1,1)
         x_hat = self.decoder(z)
-        return x_hat,mu,log_var
+        if self.training:
+            return x_hat,mu,log_var
+        else:
+            return self.get_test_features(enc,x,x_hat)
+
 
     def _get_reconstruction_loss(self, batch):
         """
@@ -188,5 +193,7 @@ if __name__=="__main__":
     #model=Autoencoder(latent_dim=512)
     x=torch.rand(2,3,128,128)
     model=Autoencoder(512)
-    y=model(x)
-    print(y.shape)
+    model.eval()
+    #y,mu,var=model(x)
+    enc=model(x)
+    print(enc.shape)
