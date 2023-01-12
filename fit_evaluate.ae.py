@@ -6,34 +6,6 @@ from tqdm import tqdm
 import scipy
 from scipy import stats
 
-def estimate_gaussian(X): 
-    """
-    Calculates mean and variance of all features 
-    in the dataset
-    
-    Args:
-        X (ndarray): (m, n) Data matrix
-    
-    Returns:
-        mu (ndarray): (n,) Mean of all features
-        var (ndarray): (n,) Variance of all features
-    """
-    m, n = X.shape
-    mu= np.mean(X,axis=0)
-    var= np.var(X,axis=0) 
-    return mu, var
-
-def reparameterize(mu: Tensor, logvar: Tensor) -> Tensor:
-    """
-    Reparameterization trick to sample from N(mu, var) from
-    N(0,1).
-    :param mu: (Tensor) Mean of the latent Gaussian [B x D]
-    :param logvar: (Tensor) Standard deviation of the latent Gaussian [B x D]
-    :return: (Tensor) [B x D]
-    """
-    std = torch.exp(0.5 * logvar)
-    eps = torch.randn_like(std)
-    return eps * std + mu
 
 def get_features(model,dloader,keepk=None):
     ## Train features for checking 
