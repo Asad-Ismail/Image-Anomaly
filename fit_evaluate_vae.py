@@ -5,6 +5,7 @@ import numpy as np
 from tqdm import tqdm
 import scipy
 from scipy import stats
+from sklearn.neighbors import KernelDensity
 
 
 def get_features(model,dloader):
@@ -112,15 +113,14 @@ def get_kde_probs(model,save_examples=False):
     train_loader,val_loader,_=get_data(8)
     train_features,_=get_features(model,train_loader)
     val_features,val_labels=get_features(model,val_loader)
+    ## Fit KDE on Training features
+    kde = KernelDensity(kernel='gaussian', bandwidth=0.000001).fit(train_features)
+    ## Evalue on val loader
+    probs =  kde.score_samples(val_features)
 
-    kernel=(mean,var)
-    probs,labels=get_kdes(model,val_loader,kernel,save_examples=save_examples)
-    #return
-    #probs,labels=get_kdes(model,val_loader,(mu,var),save_examples=save_examples)
-    if not save_examples:
-        epsilon, F1 = select_threshold(labels, probs,reverse=False)
-        print('Best epsilon found using cross-validation: %e' % epsilon)
-        print('Best F1 on Cross Validation Set: %f' % F1)
+    epsilon, F1 = select_threshold(val_labels, probs,reverse=False)
+    print('Best epsilon found using cross-validation: %e' % epsilon)
+    print('Best F1 on Cross Validation Set: %f' % F1)
     return dists,labels
 
 
@@ -130,7 +130,4 @@ if __name__=="__main__":
     print(f"Getting Model!!")
     weights="./ckpts/anamoly_road_512/lightning_logs/version_1/checkpoints/epoch=209-step=202020.ckpt"
     model = Autoencoder.load_from_checkpoint(weights)
-    #dists,labels=get_reconstruction_dist(model,save_examples=False)
-    #dists,labels=get_reconstruction_dist(model,save_examples=True)
-
     get_kde_probs(model,save_examples=False)
