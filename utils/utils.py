@@ -102,7 +102,7 @@ def select_threshold(y_val, p_val,reverse=False):
         else:
             pred= (p_val<epsilon)
 
-        F1=get_F1(preds,y_val)
+        F1=get_F1(pred,y_val)
         
         if F1 > best_F1:
             best_F1 = F1
