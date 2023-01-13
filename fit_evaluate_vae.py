@@ -8,6 +8,8 @@ from scipy import stats
 from sklearn.neighbors import KernelDensity
 
 
+torch.multiprocessing.set_sharing_strategy('file_system')
+
 def get_features(model,dloader):
     ## Train features for checking 
     features_mu=[]
@@ -95,7 +97,6 @@ def get_reconstruction_dist(model,save_examples=True):
     - dists (List[float]): A list of reconstruction losses.
     - labels (List[int]): A list of labels for the data (0 for normal, 1 for anomalous).
     """
-    print(f"Getting Data!!")
     train_loader,val_loader,_=get_data(128)
     dists,labels=get_recons_loss(model,val_loader,save_examples=save_examples)
     if not save_examples:
@@ -106,22 +107,36 @@ def get_reconstruction_dist(model,save_examples=True):
 
 
 
-
 def get_kde_probs(model,save_examples=False):
-    print(f"Getting Data!!")
     #import seaborn as sns
     train_loader,val_loader,_=get_data(8)
     train_features,_=get_features(model,train_loader)
     val_features,val_labels=get_features(model,val_loader)
     ## Fit KDE on Training features
-    kde = KernelDensity(kernel='gaussian', bandwidth=0.000001).fit(train_features)
+    #kde = KernelDensity(kernel='gaussian', bandwidth=0.000001).fit(train_features)
+    kde = KernelDensity(kernel='cosine').fit(train_features)
     ## Evalue on val loader
     probs =  kde.score_samples(val_features)
+
+    print(f"Min and Max Probs of Anamoly {probs[val_labels==1].min()}, {probs[val_labels==1].max()} ")
+
+    print(f"Min and Max Probs of Normal {probs[val_labels==0].min()}, {probs[val_labels==0].max()} ")
+
+    #s = len(val_labels)
+    #c = np.sum(val_labels==1)
+    #g = c/s
+    #thresh = np.percentile(probs, int(g*100))
+    #pred = (probs < thresh).astype(int)
+    
+    #F1=get_F1(pred,val_labels)
+    #print(f"Threshold is {thresh}")
+    #print(f"F1 is {F1}")
+
 
     epsilon, F1 = select_threshold(val_labels, probs,reverse=False)
     print('Best epsilon found using cross-validation: %e' % epsilon)
     print('Best F1 on Cross Validation Set: %f' % F1)
-    return dists,labels
+    return epsilon,F1
 
 
 

@@ -32,11 +32,6 @@ def multivariate_gaussian(X, mu, var):
     """
     
     k = len(mu)
-    
-    #if np.min(var)<1e-2:
-    #    print(f"Det of orig var is {np.linalg.det(np.diag(var))}")
-    #    var+=1
-    #    print(f"Det of Mod var is {np.linalg.det(np.diag(var))}")
 
     if var.ndim == 1:
         var = np.diag(var)
@@ -70,8 +65,15 @@ def visualize_fit(X, mu, var):
     # Set the x-axis label
     plt.xlabel('Latency (ms)')
 
-# UNQ_C2
-# GRADED FUNCTION: select_threshold
+def get_F1(preds,gts):
+    tp= sum(np.logical_and(gts==1, preds==True))
+    fp= sum(np.logical_and(gts==0,preds==True))
+    fn= sum(np.logical_and(gts==1, preds==False))
+    prec=tp/(tp+fp)
+    rec=tp/(tp+fn)
+    F1=(2*(prec*rec))/(prec+rec)
+    return F1
+
 
 def select_threshold(y_val, p_val,reverse=False): 
     """
@@ -99,13 +101,8 @@ def select_threshold(y_val, p_val,reverse=False):
             pred= (p_val>epsilon)
         else:
             pred= (p_val<epsilon)
-        tp= sum(np.logical_and(y_val==1, pred==True))
-        fp= sum(np.logical_and(y_val==0,pred==True))
-        fn= sum(np.logical_and(y_val==1, pred==False))
-        
-        prec=tp/(tp+fp)
-        rec=tp/(tp+fn)
-        F1=(2*(prec*rec))/(prec+rec)
+
+        F1=get_F1(preds,y_val)
         
         if F1 > best_F1:
             best_F1 = F1
