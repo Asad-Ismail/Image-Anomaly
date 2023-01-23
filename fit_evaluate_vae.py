@@ -6,6 +6,7 @@ from tqdm import tqdm
 import scipy
 from scipy import stats
 from sklearn.neighbors import KernelDensity
+import pickle
 
 
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -107,9 +108,15 @@ def get_reconstruction_dist(model,save_examples=True):
 
 
 
-def get_kde_probs(model,save_examples=False):
+def get_kde_probs(model,save_examples=False,use_cache=True):
     #import seaborn as sns
-    train_loader,val_loader,_=get_data(8)
+    train_loader,val_loader,_=get_data(2)
+    if use_cache:
+        if os.path.exists("train_features.npy"):
+            np.load("train_features.npy")
+    else:
+        train_features,_=get_features(model,train_loader)
+        np.save("train_features.npy", train_features)
     train_features,_=get_features(model,train_loader)
     val_features,val_labels=get_features(model,val_loader)
     ## Fit KDE on Training features
