@@ -118,6 +118,7 @@ class Autoencoder(pl.LightningModule):
         rec_euclidean = relative_euclidean_distance(x.flatten(start_dim=1), xhat.flatten(start_dim=1))
         rec_cosine = F.cosine_similarity(x.flatten(start_dim=1), xhat.flatten(start_dim=1),dim=1)
         enc = torch.cat([enc, rec_euclidean.unsqueeze(-1), rec_cosine.unsqueeze(-1)], dim=1)
+         # return rec_cosine.unsqueeze(-1)
         return enc
 
     def forward(self, x):
@@ -126,8 +127,8 @@ class Autoencoder(pl.LightningModule):
         """
         enc,mu, log_var = self.encoder(x)
         z = self.reparameterize(mu, log_var)
-        z= z.reshape(z.shape[0],-1,1,1)
-        x_hat = self.decoder(z)
+        zreshaped= z.reshape(z.shape[0],-1,1,1)
+        x_hat = self.decoder(zreshaped)
         if self.training:
             return x_hat,mu,log_var
         else:
