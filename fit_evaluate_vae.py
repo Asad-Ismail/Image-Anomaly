@@ -111,11 +111,12 @@ def get_reconstruction_dist(model,save_examples=True):
 def get_kde_probs(model,save_examples=False,use_cache=True):
     #import seaborn as sns
     train_loader,val_loader,_=get_data(2)
-    if use_cache:
-        if os.path.exists("train_features.npy"):
-            np.load("train_features.npy")
+    if use_cache and os.path.exists("train_features.npy"):
+        train_features=np.load("train_features.npy")
     else:
+        print(f"Train features not found calculating!!")
         train_features,_=get_features(model,train_loader)
+        print(f"Saving train features!")
         np.save("train_features.npy", train_features)
     train_features,_=get_features(model,train_loader)
     val_features,val_labels=get_features(model,val_loader)
