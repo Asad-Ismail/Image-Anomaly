@@ -34,6 +34,8 @@ def get_features(model,dloader):
     
     features=np.concatenate(features,axis=0)
     labels=np.concatenate(labels,axis=0)
+    # Flipping labels as Ananmoly gets 0 by default
+    labels = (~labels.astype(bool)).astype(int)
     return features,labels
 
 
@@ -111,15 +113,16 @@ def get_reconstruction_dist(model,save_examples=True):
 
 def get_kde_probs(model,save_examples=False,use_cache=True):
     #import seaborn as sns
-    train_loader,val_loader,_=get_data(2)
+    train_loader,val_loader,_=get_data(32)
     if use_cache and os.path.exists("train_features.npy"):
+        print(f"Using cached training features!!")
         train_features=np.load("train_features.npy")
     else:
         print(f"Train features not found calculating!!")
         train_features,_=get_features(model,train_loader)
         print(f"Saving train features!")
         np.save("train_features.npy", train_features)
-    train_features,_=get_features(model,train_loader)
+    #train_features,_=get_features(model,train_loader)
     val_features,val_labels=get_features(model,val_loader)
     ## Fit KDE on Training features
     kde = KernelDensity(kernel='gaussian').fit(train_features)
@@ -127,10 +130,9 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
     ## Evalue on val loader
     probs =  kde.score_samples(val_features)
 
-    print(f"Min and Max Probs of Anamoly {probs[val_labels==1].min()}, {probs[val_labels==1].max()} ")
-
     print(f"Min and Max Probs of Normal {probs[val_labels==0].min()}, {probs[val_labels==0].max()} ")
 
+    print(f"Min and Max Probs of Anamoly {probs[val_labels==1].min()}, {probs[val_labels==1].max()} ")
     #s = len(val_labels)
     #c = np.sum(val_labels==1)
     #g = c/s
