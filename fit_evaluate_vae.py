@@ -125,7 +125,7 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
     #train_features,_=get_features(model,train_loader)
     val_features,val_labels=get_features(model,val_loader)
     ## Fit KDE on Training features
-    kde = KernelDensity(kernel='gaussian').fit(train_features)
+    kde = KernelDensity(kernel='gaussian',bandwidth=0.001).fit(train_features)
     #kde = KernelDensity(kernel='cosine').fit(train_features)
     ## Evalue on val loader
     probs =  kde.score_samples(val_features)
