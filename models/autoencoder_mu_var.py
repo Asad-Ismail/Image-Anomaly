@@ -13,8 +13,8 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 import timm
 
 
-def relative_euclidean_distance(pred, gt):
-    return (pred-gt).norm(2,dim=1) / pred.norm(2,dim=1)
+def relative_euclidean_distance(pred, gt,eps=1e-7):
+    return (pred-gt).norm(2,dim=1) / (pred.norm(2,dim=1)+eps)
 
 
 class Encoder(nn.Module):

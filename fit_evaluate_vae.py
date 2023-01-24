@@ -129,22 +129,15 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
     kde = KernelDensity(kernel='gaussian',bandwidth=1).fit(train_features)
     #kde = KernelDensity(kernel='cosine').fit(train_features)
     ## Evalue on val loader
+    print(f"Val features shape is {val_features.shape})")
+    print(f"Train features min and max are {train_features.min()}, {train_features.max()}")
+    print(f"Val features min and max are {val_features.min()}, {val_features.max()}")
+    print(f"Encoding of anamoly object is {val_features[val_labels==1]}")
     probs =  kde.score_samples(val_features)
 
     print(f"Min and Max Probs of Normal {probs[val_labels==0].min()}, {probs[val_labels==0].max()} ")
 
     print(f"Min and Max Probs of Anamoly {probs[val_labels==1].min()}, {probs[val_labels==1].max()} ")
-
-    print(f"Encoding of anamoly object is {val_features[val_labels==1]}")
-    #s = len(val_labels)
-    #c = np.sum(val_labels==1)
-    #g = c/s
-    #thresh = np.percentile(probs, int(g*100))
-    #pred = (probs < thresh).astype(int)
-    
-    #F1=get_F1(pred,val_labels)
-    #print(f"Threshold is {thresh}")
-    #print(f"F1 is {F1}")
     epsilon, F1 = select_threshold(val_labels, probs,reverse=False)
     print('Best epsilon found using cross-validation: %e' % epsilon)
     print('Best F1 on Cross Validation Set: %f' % F1)
@@ -155,6 +148,6 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
 
 if __name__=="__main__":
     print(f"Getting Model!!")
-    weights="./ckpts/anamoly_road_512/lightning_logs/version_1/checkpoints/epoch=209-step=202020.ckpt"
+    weights="./ckpts/anamoly_road_512/lightning_logs/version_2/checkpoints/epoch=50-step=49062.ckpt"
     model = Autoencoder.load_from_checkpoint(weights)
     get_kde_probs(model,save_examples=False)

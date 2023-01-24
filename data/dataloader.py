@@ -29,5 +29,5 @@ def get_data(batch_sz=32):
     train_dataset = datasets.ImageFolder(train_dir, transform=transform)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_sz,num_workers=8,shuffle=True,drop_last=True) 
     val_dataset = datasets.ImageFolder(val_dir, transform=transform)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_sz, num_workers=8,shuffle=True,drop_last=True)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_sz, num_workers=8,shuffle=True,drop_last=False)
     return train_loader,val_loader,train_dataset
