@@ -102,7 +102,8 @@ class Autoencoder(pl.LightningModule):
                  decoder_class : object = Decoder,
                  num_input_channels: int = 3,
                  width:int= 128,
-                 height:int= 128):
+                 height:int= 128.,
+                 is_training=False):
         super().__init__()
         # Saving hyperparameters of autoencoder
         self.save_hyperparameters()
@@ -112,6 +113,7 @@ class Autoencoder(pl.LightningModule):
         self.inception= timm.create_model('vgg19_bn',features_only=True, pretrained=True)
         # Example input array needed for visualizing the graph of the network
         self.example_input_array = torch.zeros(2, num_input_channels, width, height)
+        self.is_training=is_training
     
     @torch.no_grad()
     def get_test_features(self,enc,x,xhat):
@@ -132,8 +134,11 @@ class Autoencoder(pl.LightningModule):
         if self.training:
             return x_hat,mu,log_var
         else:
-            #return enc
-            return self.get_test_features(enc,x,x_hat)
+            #This one is just hack for not chaning the training code while logging validation loss
+            if self.is_training:
+                return x_hat,mu,log_var
+            else:
+                return self.get_test_features(enc,x,x_hat)
 
 
     def _get_reconstruction_loss(self, batch):

@@ -42,12 +42,13 @@ def train_Anamoly(latent_dim,train_loader,val_loader,vis_dataset):
     if os.path.isfile(pretrained_filename):
         print("Found pretrained model, loading...")
         try:
-            model = Autoencoder.load_from_checkpoint(pretrained_filename)
+            model = Autoencoder.load_from_checkpoint(pretrained_filename,is_training=True)
         except:
             print(f"Cannot Load pretrained model loading model from scratch")
-            model = Autoencoder(latent_dim=latent_dim)
+            model = Autoencoder(latent_dim=latent_dim,is_training=True)
     else:
-        model = Autoencoder(latent_dim=latent_dim)
+        model = Autoencoder(latent_dim=latent_dim,is_training=True)
+    model.train()
     trainer.fit(model, train_loader, val_loader)
     # Test best model on validation and test set
     val_result = trainer.test(model, val_loader, verbose=False)

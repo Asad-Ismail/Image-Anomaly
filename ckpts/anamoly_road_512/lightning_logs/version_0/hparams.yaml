@@ -1,6 +1,0 @@
-decoder_class: !!python/name:models.autoencoder_vgg.Decoder ''
-encoder_class: !!python/name:models.autoencoder_vgg.Encoder ''
-height: 512
-latent_dim: 512
-num_input_channels: 3
-width: 512
