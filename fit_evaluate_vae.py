@@ -126,7 +126,7 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
     val_features,val_labels=get_features(model,val_loader)
     ## Fit KDE on Training features
     print(f"Fitting gaussian on trianing data")
-    kde = KernelDensity(kernel='gaussian',bandwidth=0.001).fit(train_features)
+    kde = KernelDensity(kernel='gaussian',bandwidth=1).fit(train_features)
     #kde = KernelDensity(kernel='cosine').fit(train_features)
     ## Evalue on val loader
     probs =  kde.score_samples(val_features)
@@ -134,6 +134,8 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
     print(f"Min and Max Probs of Normal {probs[val_labels==0].min()}, {probs[val_labels==0].max()} ")
 
     print(f"Min and Max Probs of Anamoly {probs[val_labels==1].min()}, {probs[val_labels==1].max()} ")
+
+    print(f"Encoding of anamoly object is {val_features[val_labels==1]}")
     #s = len(val_labels)
     #c = np.sum(val_labels==1)
     #g = c/s
@@ -143,8 +145,6 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
     #F1=get_F1(pred,val_labels)
     #print(f"Threshold is {thresh}")
     #print(f"F1 is {F1}")
-
-
     epsilon, F1 = select_threshold(val_labels, probs,reverse=False)
     print('Best epsilon found using cross-validation: %e' % epsilon)
     print('Best F1 on Cross Validation Set: %f' % F1)

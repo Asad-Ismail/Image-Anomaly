@@ -132,6 +132,7 @@ class Autoencoder(pl.LightningModule):
         if self.training:
             return x_hat,mu,log_var
         else:
+            #return enc
             return self.get_test_features(enc,x,x_hat)
 
 
