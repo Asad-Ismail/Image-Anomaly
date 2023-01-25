@@ -117,9 +117,10 @@ class Autoencoder(pl.LightningModule):
     
     @torch.no_grad()
     def get_test_features(self,enc,x,xhat):
-        rec_euclidean = relative_euclidean_distance(x.flatten(start_dim=1), xhat.flatten(start_dim=1))
-        rec_cosine = F.cosine_similarity(x.flatten(start_dim=1), xhat.flatten(start_dim=1),dim=1)
-        enc = torch.cat([enc, rec_euclidean.unsqueeze(-1), rec_cosine.unsqueeze(-1)], dim=1)
+        #rec_euclidean = relative_euclidean_distance(x.flatten(start_dim=1), xhat.flatten(start_dim=1))
+        rec_euclidean = F.mse_loss(xhat.flatten(start_dim=1), x.flatten(start_dim=1), reduction="none").sum(dim=[1])
+        #rec_cosine = F.cosine_similarity(x.flatten(start_dim=1), xhat.flatten(start_dim=1),dim=1)
+        enc = torch.cat([enc, rec_euclidean.unsqueeze(-1)], dim=1)
          # return rec_cosine.unsqueeze(-1)
         return enc
 
