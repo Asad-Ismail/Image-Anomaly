@@ -102,7 +102,7 @@ class Autoencoder(pl.LightningModule):
                  decoder_class : object = Decoder,
                  num_input_channels: int = 3,
                  width:int= 128,
-                 height:int= 128.,
+                 height:int= 128,
                  is_training=False):
         super().__init__()
         # Saving hyperparameters of autoencoder

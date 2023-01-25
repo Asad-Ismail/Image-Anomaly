@@ -1,6 +1,7 @@
 decoder_class: !!python/name:models.autoencoder_mu_var.Decoder ''
 encoder_class: !!python/name:models.autoencoder_mu_var.Encoder ''
 height: 128
+is_training: true
 latent_dim: 512
 num_input_channels: 3
 width: 128
