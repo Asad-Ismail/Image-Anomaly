@@ -25,9 +25,9 @@ def get_features(model,dloader):
         #    break
         x,label=item[0],item[1]
         model.cuda()
-        model.eval()
         x=x.cuda()
         enc=model(x)
+        print(enc)
         enc=enc.detach().cpu().numpy()
         labels.append(label)
         features.append(enc)
@@ -149,5 +149,6 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
 if __name__=="__main__":
     print(f"Getting Model!!")
     weights="./ckpts/anamoly_road_512/lightning_logs/version_0/checkpoints/epoch=53-step=51948.ckpt"
-    model = Autoencoder.load_from_checkpoint(weights,training=False)
+    model = Autoencoder.load_from_checkpoint(weights,is_training=False)
+    model.eval()
     get_kde_probs(model,save_examples=False)
