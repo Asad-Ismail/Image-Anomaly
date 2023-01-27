@@ -148,6 +148,6 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
 
 if __name__=="__main__":
     print(f"Getting Model!!")
-    weights="./ckpts/anamoly_road_512/lightning_logs/version_2/checkpoints/epoch=50-step=49062.ckpt"
-    model = Autoencoder.load_from_checkpoint(weights)
+    weights="./ckpts/anamoly_road_512/lightning_logs/version_0/checkpoints/epoch=53-step=51948.ckpt"
+    model = Autoencoder.load_from_checkpoint(weights,training=False)
     get_kde_probs(model,save_examples=False)
