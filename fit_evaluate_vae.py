@@ -27,7 +27,6 @@ def get_features(model,dloader):
         model.cuda()
         x=x.cuda()
         enc=model(x)
-        print(enc)
         enc=enc.detach().cpu().numpy()
         labels.append(label)
         features.append(enc)
