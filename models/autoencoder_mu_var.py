@@ -11,6 +11,7 @@ from torchvision import transforms
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 import timm
+from tqdm import tqdm
 
 
 def relative_euclidean_distance(pred, gt,eps=1e-7):
@@ -119,7 +120,7 @@ class Autoencoder(pl.LightningModule):
     def get_test_features(self,enc,x,xhat):
         #rec_euclidean = relative_euclidean_distance(x.flatten(start_dim=1), xhat.flatten(start_dim=1))
         rec_euclidean = F.mse_loss(xhat.flatten(start_dim=1), x.flatten(start_dim=1), reduction="none").sum(dim=[1])
-        return rec_euclidean.reshape(-1, 1)
+        #return rec_euclidean.reshape(-1, 1)
         #rec_cosine = F.cosine_similarity(x.flatten(start_dim=1), xhat.flatten(start_dim=1),dim=1)
         enc = torch.cat([enc, rec_euclidean.unsqueeze(-1)], dim=1)
          # return rec_cosine.unsqueeze(-1)

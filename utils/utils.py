@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+from tqdm import tqdm
 
 
 def get_train_images(dataset,num):
@@ -129,11 +130,13 @@ def select_exact_threshold(y_val, p_val,reverse=False):
     best_F1 = 0
     F1 = 0
     
-    p_val=sorted(p_val)
+    #p_val=sorted(p_val)
     
-    for epsilon in p_val:
+    print(f"Calculating best threshold!")
+
+    for epsilon in tqdm(p_val):
         if reverse:
-            pred= (p_val>=epsilon)
+            pred= (p_val>epsilon)
         else:
             pred= (p_val<epsilon)
 

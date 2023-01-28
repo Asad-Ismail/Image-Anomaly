@@ -71,6 +71,7 @@ def get_recons_loss(model,dloader,save_examples=True,imgs=20):
         model.eval()
         x=x.cuda()
         pred_img=model(x).detach().cpu()
+        #dist=F.mse_loss(pred_img.flatten(start_dim=1), x.detach().cpu().flatten(start_dim=1), reduction="none").sum(dim=[1])
         dist=F.l1_loss(pred_img.flatten(start_dim=1),x.detach().cpu().flatten(start_dim=1),reduction="none").mean(axis=1)
         dists.append(dist.detach().cpu().numpy())
         labels.append(label.numpy())
@@ -82,7 +83,6 @@ def get_recons_loss(model,dloader,save_examples=True,imgs=20):
     labels = (~labels.astype(bool)).astype(int)
     print(f"Distance anamoly min and max are {dists[labels==1].min()}, {dists[labels==1].max()}")
     print(f"Distance normal min and max are {dists[labels==0].min()}, {dists[labels==0].max()}")
-    print(dists[labels==0])
     if save_examples:
         vis_results(pred_images,labels,dists,imgs=imgs)
     return dists,labels
@@ -106,7 +106,7 @@ def get_reconstruction_dist(model,save_examples=True):
     train_loader,val_loader,_=get_data(128)
     dists,labels=get_recons_loss(model,val_loader,save_examples=save_examples)
     if not save_examples:
-        epsilon, F1 = select_threshold(labels, dists,reverse=True)
+        epsilon, F1 = select_exact_threshold(labels, dists,reverse=True)
         print('Best epsilon found using cross-validation: %e' % epsilon)
         print('Best F1 on Cross Validation Set: %f' % F1)
     return dists,labels
@@ -140,7 +140,7 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
     print(f"Min and Max Probs of Normal {probs[val_labels==0].min()}, {probs[val_labels==0].max()} ")
 
     print(f"Min and Max Probs of Anamoly {probs[val_labels==1].min()}, {probs[val_labels==1].max()} ")
-    epsilon, F1 = select_threshold(val_labels, probs,reverse=False)
+    epsilon, F1 = select_exact_threshold(val_labels, probs,reverse=False)
     print('Best epsilon found using cross-validation: %e' % epsilon)
     print('Best F1 on Cross Validation Set: %f' % F1)
     return epsilon,F1
@@ -153,5 +153,5 @@ if __name__=="__main__":
     weights="./ckpts/anamoly_road_512/lightning_logs/version_0/checkpoints/epoch=53-step=51948.ckpt"
     model = Autoencoder.load_from_checkpoint(weights,is_training=False)
     model.eval()
-    get_reconstruction_dist(model,save_examples=False)
-    #get_kde_probs(model,save_examples=False)
+    #get_reconstruction_dist(model,save_examples=False)
+    get_kde_probs(model,save_examples=False)
