@@ -109,3 +109,38 @@ def select_threshold(y_val, p_val,reverse=False):
             best_epsilon = epsilon
         
     return best_epsilon, best_F1
+
+def select_exact_threshold(y_val, p_val,reverse=False): 
+    """
+    Finds the best threshold to use for selecting outliers 
+    based on the results from a validation set (p_val) 
+    and the ground truth (y_val)
+    
+    Args:
+        y_val (ndarray): Ground truth on validation set
+        p_val (ndarray): Results on validation set
+        
+    Returns:
+        epsilon (float): Threshold chosen 
+        F1 (float):      F1 score by choosing epsilon as threshold
+    """ 
+
+    best_epsilon = 0
+    best_F1 = 0
+    F1 = 0
+    
+    p_val=sorted(p_val)
+    
+    for epsilon in p_val:
+        if reverse:
+            pred= (p_val>=epsilon)
+        else:
+            pred= (p_val<epsilon)
+
+        F1=get_F1(pred,y_val)
+        
+        if F1 > best_F1:
+            best_F1 = F1
+            best_epsilon = epsilon
+        
+    return best_epsilon, best_F1

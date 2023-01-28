@@ -78,8 +78,11 @@ def get_recons_loss(model,dloader,save_examples=True,imgs=20):
             pred_images.append(pred_img)
     dists=np.concatenate(dists,axis=0)
     labels=np.concatenate(labels,axis=0)
-    # Flipping labels as originally 1 is non anamoly
+    # Flipping labels as originally 0 is non anamoly
     labels = (~labels.astype(bool)).astype(int)
+    print(f"Distance anamoly min and max are {dists[labels==1].min()}, {dists[labels==1].max()}")
+    print(f"Distance normal min and max are {dists[labels==0].min()}, {dists[labels==0].max()}")
+    print(dists[labels==0])
     if save_examples:
         vis_results(pred_images,labels,dists,imgs=imgs)
     return dists,labels
@@ -150,4 +153,5 @@ if __name__=="__main__":
     weights="./ckpts/anamoly_road_512/lightning_logs/version_0/checkpoints/epoch=53-step=51948.ckpt"
     model = Autoencoder.load_from_checkpoint(weights,is_training=False)
     model.eval()
-    get_kde_probs(model,save_examples=False)
+    get_reconstruction_dist(model,save_examples=False)
+    #get_kde_probs(model,save_examples=False)
