@@ -37,7 +37,7 @@ class Decoder(nn.Module):
                  num_input_channels : int,
                  c_hid : int,
                  upsample: int=4,
-                 interlayers:int 5,
+                 interlayers:int=3,
                  act_fn : object = nn.GELU):
         """
         Inputs:
@@ -48,22 +48,31 @@ class Decoder(nn.Module):
         """
         super().__init__()
         
-        channels=[c_hid,c_hid//2,c_hid//4,c_hid//8]
+        channels=[c_hid,c_hid//2,c_hid//4,c_hid//8,c_hid//16]
         ## Convs which are to be embedded in between upsampling layers
         layers=[]
         for i in range(upsample):
-            layers.append(nn.ConvTranspose2d(channels[i], channels[i], kernel_size=3, output_padding=1, padding=1, stride=2))
-            layers.append(act_fn()),
+            # Two upsampling layers
+            layers.append(nn.ConvTranspose2d(channels[i], channels[i], kernel_size=2, stride=2))
+            layers.append(act_fn())
+            layers.append(nn.ConvTranspose2d(channels[i], channels[i], kernel_size=2, stride=2))
+            layers.append(act_fn())
+            ## Conv Layers
             midconvs=[]
-            for _ in range(interlayers):
+            for j in range(interlayers):
                 #Last layer
                 if i==upsample-1:
-                    midconvs.append(nn.Conv2d(channels[i], channels[i], kernel_size=3, padding=1))
+                    midconvs.append(nn.Conv2d(channels[i], num_input_channels, kernel_size=3, padding=1))
                     midconvs.append(nn.Sigmoid())
                     break
                 else:
-                    midconvs.append(nn.Conv2d(channels[i], channels[i], kernel_size=3, padding=1))
-                    midconvs.append(act_fn())
+                    # first layer change the number of channels
+                    if j==0:
+                        midconvs.append(nn.Conv2d(channels[i], channels[i+1], kernel_size=3, padding=1))
+                        midconvs.append(act_fn())
+                    else:
+                        midconvs.append(nn.Conv2d(channels[i+1], channels[i+1], kernel_size=3, padding=1))
+                        midconvs.append(act_fn())
             layers.extend(midconvs)
         
         self.net = nn.Sequential(*layers)
@@ -89,6 +98,7 @@ class Autoencoder(pl.LightningModule):
         # Creating encoder and decoder
         self.encoder = encoder_class()
         self.decoder = decoder_class(num_input_channels, latent_dim)
+        print(self.decoder)
         #self.inception= timm.create_model('vgg19_bn',features_only=True, pretrained=True)
         # Example input array needed for visualizing the graph of the network
         self.example_input_array = torch.zeros(2, num_input_channels, width, height)
@@ -111,7 +121,9 @@ class Autoencoder(pl.LightningModule):
         enc,mu, log_var = self.encoder(x)
         z = self.reparameterize(mu, log_var)
         zreshaped= z.reshape(z.shape[0],-1,1,1)
+        print(f"Input to decoder is {zreshaped.shape}")
         x_hat = self.decoder(zreshaped)
+        print(f"Decoder shape is {x_hat.shape}")
         if self.training:
             return x_hat,mu,log_var
         else:
@@ -179,7 +191,7 @@ class Autoencoder(pl.LightningModule):
 
 if __name__=="__main__":
     #model=Autoencoder(latent_dim=512)
-    x=torch.rand(2,3,128,128)
+    x=torch.rand(2,3,256,256)
     model=Autoencoder(512)
     model.eval()
     #y,mu,var=model(x)
