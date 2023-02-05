@@ -2,7 +2,7 @@ from torchvision import datasets, transforms
 import torch
 from torchvision.transforms import InterpolationMode
 
-def get_data(batch_sz=32,img_sz=256):
+def get_data(train_dir,val_dir,batch_sz=32,img_sz=256):
     """
     Load and preprocess image data for training and validation.
 
@@ -20,8 +20,8 @@ def get_data(batch_sz=32,img_sz=256):
     - val_loader (torch.utils.data.DataLoader): DataLoader for the validation data.
     - train_dataset (torch.utils.data.Dataset): Dataset for the training data.
     """
-    train_dir = '../AnamolyData/train/images'
-    val_dir= '../AnamolyData/val/images'
+    #train_dir = '../AnamolyData/train/images'
+    #val_dir= '../AnamolyData/val/images'
     transform = transforms.Compose([transforms.Resize((img_sz,img_sz),interpolation=InterpolationMode.NEAREST),
                                     transforms.ToTensor(),
                                  ])

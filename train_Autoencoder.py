@@ -7,28 +7,31 @@ import argparse
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--dataset",default="hub://aismail2/cucumber_OD",help="Activeloop data path")
+parser.add_argument("--train_dir",default="hub://aismail2/cucumber_OD",help="Train dir with only normal images")
+parser.add_argument("--val_dir",default="hub://aismail2/cucumber_OD",help="Val dir with only normal and anamolus images")
 parser.add_argument("--size",default=256,type=int,help="Image size used for training model")
 parser.add_argument("--epochs",default=300,type=int,help="Image size used for training model")
 parser.add_argument("--device", default="cuda",help="Device to Train Model")
 parser.add_argument("--batch_sz", default=32,type=int,help="Device to Train Model")
 parser.add_argument("--model_arch",default="repvggplus", choices=['resnet', 'repvgg','repvggplus'],type=str,help="Model Architecture")
 parser.add_argument("--ckpt_path",default="./ckpts",type=str,help="Output of weights")
-parser.add_argument("--experiment",default="bottle",type=str,help="Experiment")
+parser.add_argument("--experiment",default="bottle",type=str,help="Experiment Name")
 
 args = parser.parse_args()
-data_path = args.dataset
+train_dir = args.train_dir
+val_dir = args.val_dir
 img_sz = args.size
 device = args.device
 ckpt_path=args.ckpt_path
 epochs=args.epochs
 modelarch=args.model_arch
 batch_sz=args.batch_sz
+experiment=args.experiment
 
 
 def train_Anamoly(latent_dim,train_loader,val_loader,vis_dataset):
     # Create a PyTorch Lightning trainer with the generation callback
-    trainer = pl.Trainer(default_root_dir=os.path.join(ckpt_path, f"anamoly_road_{latent_dim}"),
+    trainer = pl.Trainer(default_root_dir=os.path.join(ckpt_path, f"experiment_{latent_dim}"),
                          accelerator="cuda" if str(device).startswith("cuda") else "cpu",
                          devices=1,
                          max_epochs=epochs,
@@ -59,5 +62,5 @@ def train_Anamoly(latent_dim,train_loader,val_loader,vis_dataset):
 
 if __name__=="__main__":
     CHECKPOINT_PATH="anamoly_checkpoints"
-    train_loader,val_loader,vis_dataset=get_data(batch_sz)
+    train_loader,val_loader,vis_dataset=get_data(train_dir,val_dir,batch_sz)
     model,result=train_Anamoly(512,train_loader,val_loader,vis_dataset)
