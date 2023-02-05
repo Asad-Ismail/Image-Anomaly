@@ -8,12 +8,13 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset",default="hub://aismail2/cucumber_OD",help="Activeloop data path")
-parser.add_argument("--size",default=512,type=int,help="Image size used for training model")
-parser.add_argument("--epochs",default=1000,type=int,help="Image size used for training model")
+parser.add_argument("--size",default=256,type=int,help="Image size used for training model")
+parser.add_argument("--epochs",default=300,type=int,help="Image size used for training model")
 parser.add_argument("--device", default="cuda",help="Device to Train Model")
-parser.add_argument("--batch_sz", default=128,type=int,help="Device to Train Model")
+parser.add_argument("--batch_sz", default=32,type=int,help="Device to Train Model")
 parser.add_argument("--model_arch",default="repvggplus", choices=['resnet', 'repvgg','repvggplus'],type=str,help="Model Architecture")
 parser.add_argument("--ckpt_path",default="./ckpts",type=str,help="Output of weights")
+parser.add_argument("--experiment",default="bottle",type=str,help="Experiment")
 
 args = parser.parse_args()
 data_path = args.dataset
