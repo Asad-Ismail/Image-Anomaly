@@ -62,5 +62,5 @@ def train_Anamoly(latent_dim,train_loader,val_loader,vis_dataset):
 
 if __name__=="__main__":
     CHECKPOINT_PATH="anamoly_checkpoints"
-    train_loader,val_loader,vis_dataset=get_data(train_dir,val_dir,batch_sz)
+    train_loader,val_loader,vis_dataset=get_data(train_dir,val_dir,batch_sz,img_sz=256)
     model,result=train_Anamoly(512,train_loader,val_loader,vis_dataset)
