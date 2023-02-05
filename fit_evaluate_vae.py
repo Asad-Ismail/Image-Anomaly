@@ -8,9 +8,17 @@ from scipy import stats
 from sklearn.neighbors import KernelDensity
 import pickle
 import os
+import argparse
 
 
 torch.multiprocessing.set_sharing_strategy('file_system')
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--train_dir",default="dataset/bottle/train",help="Train dir with only normal images")
+parser.add_argument("--val_dir",default="dataset/bottle/test",help="Val dir with only normal and anamolus images")
+args = parser.parse_args()
+train_dir = args.train_dir
+val_dir = args.val_dir
 
 def get_features(model,dloader):
     ## Train features for checking 
@@ -67,12 +75,10 @@ def get_recons_loss(model,dloader,save_examples=True,imgs=20):
         x,label=item[0],item[1]
         if (save_examples and i>imgs):
             break
-        model.cuda()
-        model.eval()
         x=x.cuda()
-        pred_img=model(x).detach().cpu()
-        #dist=F.mse_loss(pred_img.flatten(start_dim=1), x.detach().cpu().flatten(start_dim=1), reduction="none").sum(dim=[1])
-        dist=F.l1_loss(pred_img.flatten(start_dim=1),x.detach().cpu().flatten(start_dim=1),reduction="none").mean(axis=1)
+        preds=model(x).detach().cpu()
+        # Last entry is the distance
+        dist=preds[:,-1]
         dists.append(dist.detach().cpu().numpy())
         labels.append(label.numpy())
         if save_examples:
@@ -103,7 +109,7 @@ def get_reconstruction_dist(model,save_examples=True):
     - dists (List[float]): A list of reconstruction losses.
     - labels (List[int]): A list of labels for the data (0 for normal, 1 for anomalous).
     """
-    train_loader,val_loader,_=get_data(128)
+    train_loader,val_loader,_=get_data(train_dir,val_dir,32)
     dists,labels=get_recons_loss(model,val_loader,save_examples=save_examples)
     if not save_examples:
         epsilon, F1 = select_exact_threshold(labels, dists,reverse=True)
@@ -114,8 +120,7 @@ def get_reconstruction_dist(model,save_examples=True):
 
 
 def get_kde_probs(model,save_examples=False,use_cache=True):
-    #import seaborn as sns
-    train_loader,val_loader,_=get_data(32)
+    train_loader,val_loader,_=get_data(train_dir,val_dir,32)
     if use_cache and os.path.exists("train_features.npy"):
         print(f"Using cached training features!!")
         train_features=np.load("train_features.npy")
@@ -128,18 +133,12 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
     val_features,val_labels=get_features(model,val_loader)
     ## Fit KDE on Training features
     print(f"Fitting gaussian on trianing data")
-    kde = KernelDensity(kernel='gaussian',bandwidth=1).fit(train_features)
-    #kde = KernelDensity(kernel='cosine').fit(train_features)
-    ## Evalue on val loader
+    kde = KernelDensity(kernel='gaussian',bandwidth=0.1).fit(train_features)
     print(f"Val features shape is {val_features.shape})")
-    print(f"Train features min and max are {train_features.min()}, {train_features.max()}")
-    print(f"Val features min and max are {val_features.min()}, {val_features.max()}")
-    print(f"Encoding of anamoly object is {val_features[val_labels==1]}")
     probs =  kde.score_samples(val_features)
 
-    print(f"Min and Max Probs of Normal {probs[val_labels==0].min()}, {probs[val_labels==0].max()} ")
-
-    print(f"Min and Max Probs of Anamoly {probs[val_labels==1].min()}, {probs[val_labels==1].max()} ")
+    #print(f"Min and Max Probs of Normal {probs[val_labels==0].min()}, {probs[val_labels==0].max()} ")
+    #print(f"Min and Max Probs of Anamoly {probs[val_labels==1].min()}, {probs[val_labels==1].max()} ")
     epsilon, F1 = select_exact_threshold(val_labels, probs,reverse=False)
     print('Best epsilon found using cross-validation: %e' % epsilon)
     print('Best F1 on Cross Validation Set: %f' % F1)
@@ -150,8 +149,9 @@ def get_kde_probs(model,save_examples=False,use_cache=True):
 
 if __name__=="__main__":
     print(f"Getting Model!!")
-    weights="./ckpts/anamoly_road_512/lightning_logs/version_0/checkpoints/epoch=53-step=51948.ckpt"
+    weights="./ckpts/bottle_512/lightning_logs/version_0/checkpoints/epoch=299-step=1800.ckpt"
     model = Autoencoder.load_from_checkpoint(weights,is_training=False)
     model.eval()
-    #get_reconstruction_dist(model,save_examples=False)
-    get_kde_probs(model,save_examples=False)
+    model.cuda()
+    get_reconstruction_dist(model,save_examples=False)
+    #get_kde_probs(model,save_examples=False,use_cache=True)
