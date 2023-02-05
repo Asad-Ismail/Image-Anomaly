@@ -98,7 +98,6 @@ class Autoencoder(pl.LightningModule):
         # Creating encoder and decoder
         self.encoder = encoder_class()
         self.decoder = decoder_class(num_input_channels, latent_dim)
-        print(self.decoder)
         #self.inception= timm.create_model('vgg19_bn',features_only=True, pretrained=True)
         # Example input array needed for visualizing the graph of the network
         self.example_input_array = torch.zeros(2, num_input_channels, width, height)
@@ -121,9 +120,7 @@ class Autoencoder(pl.LightningModule):
         enc,mu, log_var = self.encoder(x)
         z = self.reparameterize(mu, log_var)
         zreshaped= z.reshape(z.shape[0],-1,1,1)
-        print(f"Input to decoder is {zreshaped.shape}")
         x_hat = self.decoder(zreshaped)
-        print(f"Decoder shape is {x_hat.shape}")
         if self.training:
             return x_hat,mu,log_var
         else:
