@@ -15,7 +15,14 @@ Fit multinomial gaussian/ KDE on latent variable and find the anamoly based on P
 
 For both we acheived 76.9%F1 score
 
+# Using Aomalib Library
+
+python tools/train.py --config anomalib/models/dfkde/config.yaml
+
+Essentially main difference between our implementation and of library is:
+
 ## Examples
+
 
 
 ## General Tips
