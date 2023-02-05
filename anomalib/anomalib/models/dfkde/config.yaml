@@ -15,8 +15,8 @@ dataset:
   normalization: imagenet
   val_split_mode: same_as_test
   test_split_mode: from_dir
-  test_split_ratio: .1
-  val_split_ratio: .1
+  test_split_ratio: 1
+  val_split_ratio: 1
   transform_config:
     train: null
     val: null
