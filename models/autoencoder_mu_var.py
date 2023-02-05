@@ -36,6 +36,8 @@ class Decoder(nn.Module):
     def __init__(self,
                  num_input_channels : int,
                  c_hid : int,
+                 upsample: int=4,
+                 interlayers:int 5,
                  act_fn : object = nn.GELU):
         """
         Inputs:
@@ -46,49 +48,25 @@ class Decoder(nn.Module):
         """
         super().__init__()
         
-        inter1=c_hid//2
-        inter2=inter1//2
-        inter3=inter2//2
-
-        hidconvs=[]
-        for _ in range(5):
-            hidconvs.append(nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1))
-            hidconvs.append(act_fn())
-        inter1convs=[]
-        for _ in range(5):
-            inter1convs.append(nn.Conv2d(inter1, inter1, kernel_size=3, padding=1))
-            inter1convs.append(act_fn())
-        inter2convs=[]
-        for _ in range(5):
-            inter2convs.append(nn.Conv2d(inter2, inter2, kernel_size=3, padding=1))
-            inter2convs.append(act_fn())
-        inter3convs=[]
-        for _ in range(5):
-            inter3convs.append(nn.Conv2d(inter3, inter3, kernel_size=3, padding=1))
-            inter3convs.append(act_fn())
+        channels=[c_hid,c_hid//2,c_hid//4,c_hid//8]
+        ## Convs which are to be embedded in between upsampling layers
+        layers=[]
+        for i in range(upsample):
+            layers.append(nn.ConvTranspose2d(channels[i], channels[i], kernel_size=3, output_padding=1, padding=1, stride=2))
+            layers.append(act_fn()),
+            midconvs=[]
+            for _ in range(interlayers):
+                #Last layer
+                if i==upsample-1:
+                    midconvs.append(nn.Conv2d(channels[i], channels[i], kernel_size=3, padding=1))
+                    midconvs.append(nn.Sigmoid())
+                    break
+                else:
+                    midconvs.append(nn.Conv2d(channels[i], channels[i], kernel_size=3, padding=1))
+                    midconvs.append(act_fn())
+            layers.extend(midconvs)
         
-        self.net = nn.Sequential(
-            nn.ConvTranspose2d(c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2), # 16x16 => 32x32
-            act_fn(),
-            nn.ConvTranspose2d(c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2), # 16x16 => 32x32
-            act_fn(),
-            nn.ConvTranspose2d(c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2), # 16x16 => 32x32
-            act_fn(),
-            *hidconvs,
-            nn.ConvTranspose2d(c_hid, inter1, kernel_size=3, output_padding=1, padding=1, stride=2), # 32x32 => 64x64
-            act_fn(),
-            *inter1convs,
-            nn.ConvTranspose2d( inter1, inter2, kernel_size=3, output_padding=1, padding=1, stride=2), # 64x64 => 128x128
-            act_fn(),
-            *inter2convs,
-            nn.ConvTranspose2d(inter2, inter3, kernel_size=3, output_padding=1, padding=1, stride=2), # 128x128 => 256x256
-            act_fn(),
-            *inter3convs,
-            nn.ConvTranspose2d(inter3, num_input_channels, kernel_size=3, output_padding=1, padding=1, stride=2), # 256x256 => 512x512
-            act_fn(),
-            nn.Conv2d(num_input_channels, num_input_channels, kernel_size=3, padding=1),
-            nn.Tanh() # The input images is scaled between -1 and 1, hence the output has to be bounded as well
-        )
+        self.net = nn.Sequential(*layers)
 
     def forward(self, x):
         x = self.net(x)
