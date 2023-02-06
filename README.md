@@ -17,7 +17,8 @@ For both we acheived 76.9% F1 score for bottle anamoly
 
 # Using Aomalib Library
 
-Using DfDKM we acheived 92.7% F1 score for bottle dataset is 92.7%
+Using DfDKM we acheived 92.7% F1 score for bottle dataset is __92.7%__
+
 
 python tools/train.py --config anomalib/models/dfkde/config.yaml
 

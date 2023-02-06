@@ -1,10 +1,18 @@
 dataset:
-  name: "Bottle"
+  #name: "Bottle"
+  #format: folder
+  #path: "/home/ec2-user/SageMaker/Image-Anomaly/dataset/bottle"
+  #normal_dir: "train/normal" # name of the folder containing normal images.
+  #abnormal_dir: "test/anamoly" # name of the folder containing abnormal images.
+  #normal_test_dir: "test/normal" # name of the folder containing normal test images.
+
+  name: "Driving"
   format: folder
-  path: "/home/ec2-user/SageMaker/Image-Anomaly/dataset/bottle"
-  normal_dir: "train/normal" # name of the folder containing normal images.
-  abnormal_dir: "test/anamoly" # name of the folder containing abnormal images.
-  normal_test_dir: "test/normal" # name of the folder containing normal test images.
+  path: "/home/ec2-user/SageMaker/AnamolyData"
+  normal_dir: "train/images/normal/" # name of the folder containing normal images.
+  abnormal_dir: "val/images/anamoly" # name of the folder containing abnormal images.
+  normal_test_dir: "val/images/normal" # name of the folder containing normal test images.
+
   mask: null
   task: classification # classification or segmentation
   extensions: null
