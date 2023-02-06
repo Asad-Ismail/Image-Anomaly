@@ -13,9 +13,11 @@ Detect Anamoly based on Reconstruction loss of Autoencoder
 LAKE Model
 Fit multinomial gaussian/ KDE on latent variable and find the anamoly based on PDF with some modifications
 
-For both we acheived 76.9%F1 score
+For both we acheived 76.9% F1 score for bottle anamoly
 
 # Using Aomalib Library
+
+Using DfDKM we acheived 92.7% F1 score for bottle dataset is 92.7%
 
 python tools/train.py --config anomalib/models/dfkde/config.yaml
 
