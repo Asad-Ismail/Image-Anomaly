@@ -38,7 +38,7 @@ model:
   pre_trained: true
   # density estimation params
   n_pca_components: 16
-  max_training_points: 40000
+  max_training_points: 400000
   feature_scaling_method: scale # Determines how the feature embeddings are scaled. Options: [scale, norm]
   # generic params
   normalization_method: min_max # options: [null, min_max, cdf]
