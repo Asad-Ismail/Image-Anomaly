@@ -36,27 +36,18 @@ DfDKM acheived  F1 score for Driving dataset of __94%__
 <p align="center">
   <img alt="Light" src="vis_imgs/driving/anamoly_1.jpg" width="45%">
 &nbsp; &nbsp; &nbsp; &nbsp;
-  <img alt="Dark" src="vis_imgs/bottles/anamoly_2.jpg" width="45%">
+  <img alt="Dark" src="vis_imgs/driving/anamoly_2.jpg" width="45%">
 </p>
 <p align="center">
-  <img alt="Light" src="vis_imgs/bottles/normal_1.jpg" width="45%">
+  <img alt="Light" src="vis_imgs/driving/normal_1.jpg" width="45%">
 &nbsp; &nbsp; &nbsp; &nbsp;
-  <img alt="Dark" src="vis_imgs/bottles/normal_2.jpg" width="45%">
+  <img alt="Dark" src="vis_imgs/driving/normal_2.jpg" width="45%">
 </p>
-
-
-
-python tools/train.py --config anomalib/models/dfkde/config.yaml
-
-Essentially main difference between our implementation and of library is:
-
-## Examples
 
 
 
 ## General Tips
 
-1. Donot use any mean and std transformation on training images. Important for constant images like completely white or black
-2. Use Sigmoid as last layer to restrict output between 0 and 1
-3. Use Nearest interpolation for resizing can effect max and min values a lot if using bilibear or cubic interpolation.
+1. Use Sigmoid as last layer to restrict output between 0 and 1
+2. Use Nearest interpolation for resizing can effect max and min values a lot if using bilibear or cubic interpolation.
 4. Donot use cosine similarity metric as proposed in LAKE on images as images which can vary immensely can have very high cosine similarity metric
