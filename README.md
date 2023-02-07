@@ -17,7 +17,33 @@ For both we acheived 76.9% F1 score for bottle anamoly
 
 # Using Aomalib Library
 
-Using DfDKM we acheived 92.7% F1 score for bottle dataset is __92.7%__
+DfDKM acheived  F1 score for bottle dataset of __92.7%__
+
+
+<p align="center">
+  <img alt="Light" src="vis_imgs/bottles/anamoly_1.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Dark" src="vis_imgs/bottles/anamoly_2.png" width="45%">
+</p>
+<p align="center">
+  <img alt="Light" src="vis_imgs/bottles/normal_1.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Dark" src="vis_imgs/bottles/normal_2.png" width="45%">
+</p>
+
+DfDKM acheived  F1 score for Driving dataset of __94%__
+
+<p align="center">
+  <img alt="Light" src="vis_imgs/driving/anamoly_1.jpg" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Dark" src="vis_imgs/bottles/anamoly_2.jpg" width="45%">
+</p>
+<p align="center">
+  <img alt="Light" src="vis_imgs/bottles/normal_1.jpg" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Dark" src="vis_imgs/bottles/normal_2.jpg" width="45%">
+</p>
+
 
 
 python tools/train.py --config anomalib/models/dfkde/config.yaml
