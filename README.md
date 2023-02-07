@@ -16,8 +16,7 @@ Fit multinomial gaussian/ KDE on latent variable and find the anamoly based on P
 # Using Anomalib Library
 
 DfKDM for bottle dataset acheived F1 score  of __92.7%__
-
-
+where normal is with no defects
 <p align="center">
   <img alt="Light" src="vis_imgs/bottles/anamoly_1.png" width="45%">
 &nbsp; &nbsp; &nbsp; &nbsp;
@@ -30,7 +29,7 @@ DfKDM for bottle dataset acheived F1 score  of __92.7%__
 </p>
 
 DfKDM for Driving dataset F1 score of __94%__
-
+Where normal is defined as highway driving
 <p align="center">
   <img alt="Light" src="vis_imgs/driving/anamoly_1.jpg" width="45%">
 &nbsp; &nbsp; &nbsp; &nbsp;
