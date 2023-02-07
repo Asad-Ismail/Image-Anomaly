@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from .pre_process import PreProcessor
+from .pre_process import get_transforms
 from .tiler import Tiler
 
-__all__ = ["PreProcessor", "Tiler"]
+__all__ = ["PreProcessor", "GetTransforms","Tiler"]

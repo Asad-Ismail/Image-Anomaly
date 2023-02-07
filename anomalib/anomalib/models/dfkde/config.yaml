@@ -12,13 +12,12 @@ dataset:
   normal_dir: "train/images/normal/" # name of the folder containing normal images.
   abnormal_dir: "val/images/anamoly" # name of the folder containing abnormal images.
   normal_test_dir: "val/images/normal" # name of the folder containing normal test images.
-
   mask: null
   task: classification # classification or segmentation
   extensions: null
   image_size: 256
   train_batch_size: 32
-  test_batch_size: 32
+  test_batch_size: 8
   num_workers: 8
   normalization: imagenet
   val_split_mode: same_as_test
@@ -46,7 +45,7 @@ model:
   pre_trained: true
   # density estimation params
   n_pca_components: 16
-  max_training_points: 400000
+  max_training_points: 40000
   feature_scaling_method: scale # Determines how the feature embeddings are scaled. Options: [scale, norm]
   # generic params
   normalization_method: min_max # options: [null, min_max, cdf]
@@ -103,7 +102,7 @@ trainer:
   limit_val_batches: 1.0
   log_every_n_steps: 50
   log_gpu_memory: null
-  max_epochs: 300
+  max_epochs: 3
   max_steps: -1
   max_time: null
   min_epochs: null
