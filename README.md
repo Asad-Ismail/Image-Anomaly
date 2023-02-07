@@ -17,7 +17,7 @@ For both we acheived 76.9% F1 score for bottle anamoly
 
 # Using Aomalib Library
 
-DfDKM acheived  F1 score for bottle dataset of __92.7%__
+DfKDM for bottle dataset acheived F1 score  of __92.7%__
 
 
 <p align="center">
@@ -31,7 +31,7 @@ DfDKM acheived  F1 score for bottle dataset of __92.7%__
   <img alt="Dark" src="vis_imgs/bottles/normal_2.png" width="45%">
 </p>
 
-DfDKM acheived  F1 score for Driving dataset of __94%__
+DfKDM for Driving dataset F1 score of __94%__
 
 <p align="center">
   <img alt="Light" src="vis_imgs/driving/anamoly_1.jpg" width="45%">
@@ -51,3 +51,8 @@ DfDKM acheived  F1 score for Driving dataset of __94%__
 1. Use Sigmoid as last layer to restrict output between 0 and 1
 2. Use Nearest interpolation for resizing can effect max and min values a lot if using bilibear or cubic interpolation.
 4. Donot use cosine similarity metric as proposed in LAKE on images as images which can vary immensely can have very high cosine similarity metric
+
+
+References:
+
+1.
