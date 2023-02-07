@@ -7,15 +7,13 @@ Anamoly here is a very losse open ended term which can means for example if we s
 We mainly Implement two Methods for Image Anamoly Detection for both of the methods we first train an autoencoder to map the image to higher level representation and
 
 ## Reconstruction Based
-Detect Anamoly based on Reconstruction loss of Autoencoder
+Detect Anamoly based on Reconstruction loss of Autoencoder/VAE
 
 ## Kernel Density Based
 LAKE Model
 Fit multinomial gaussian/ KDE on latent variable and find the anamoly based on PDF with some modifications
 
-For both we acheived 76.9% F1 score for bottle anamoly
-
-# Using Aomalib Library
+# Using Anomalib Library
 
 DfKDM for bottle dataset acheived F1 score  of __92.7%__
 
@@ -55,4 +53,4 @@ DfKDM for Driving dataset F1 score of __94%__
 
 References:
 
-1.
+1.https://github.com/openvinotoolkit/anomalib
