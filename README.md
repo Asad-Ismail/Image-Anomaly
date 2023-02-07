@@ -1,5 +1,5 @@
 # Image-Anomaly
-Repo for detecting Anomalies in Images.
+Repo for detecting Anomalies in Images. We mainly focus on image classification based anamoly but segemntaiton based anamoly is also possible
 
 Anamoly here is a very losse open ended term which can means for example if we see some dataset which is "out of ordinary" it can be out of domain data, camera failure, gaussian noise, foreign objects e.t.c
 
@@ -14,6 +14,19 @@ LAKE Model
 Fit multinomial gaussian/ KDE on latent variable and find the anamoly based on PDF with some modifications
 
 # Using Anomalib Library
+
+To Train DfKDM model
+
+```
+python tools/train.py --config anomalib/models/dfkdm/config.yaml   
+
+```
+
+Results are saved in results directory
+
+To perform inference on using trained model
+use infer.ipynb notebook
+
 
 DfKDM for bottle dataset acheived F1 score  of __92.7%__
 where normal is with no defects
