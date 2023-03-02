@@ -59,8 +59,7 @@ Where normal is defined as highway driving
 ## General Tips
 
 1. Use Sigmoid as last layer to restrict output between 0 and 1
-2. Use Nearest interpolation for resizing can effect max and min values a lot if using bilibear or cubic interpolation.
-4. Donot use cosine similarity metric as proposed in LAKE on images as images which can vary immensely can have very high cosine similarity metric
+2. Donot use cosine similarity metric on raw images as images can vary immensely can have very high cosine similarity metric
 
 
 References:
